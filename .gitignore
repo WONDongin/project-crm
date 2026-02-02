@@ -1,0 +1,102 @@
+############################
+# Spring / Gradle
+############################
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+############################
+# STS
+############################
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+############################
+# IntelliJ IDEA
+############################
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+############################
+# NetBeans
+############################
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Backend Environment (DO NOT COMMIT)
+############################
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+############################
+# Frontend (Next.js)
+############################
+
+# dependencies
+frontend/node_modules/
+
+# next build output
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+
+# env files
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+
+# logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# misc
+frontend/.turbo
+frontend/.eslintcache
+frontend/.swc
+
+############################
+# Frontend OS / Editor
+############################
+frontend/.DS_Store
+frontend/.idea
