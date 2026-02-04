@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/crm
+    username: YOUR_USERNAME
+    password: YOUR_PASSWORD
+
+jwt:
+  secret: YOUR_SECRET
