@@ -2,11 +2,8 @@ spring:
   application:
     name: crm-backend
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/crm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: 1228
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  profiles:
+    active: local
 
   jpa:
     hibernate:

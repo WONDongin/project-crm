@@ -62,6 +62,7 @@ Thumbs.db
 # Backend Environment (DO NOT COMMIT)
 ############################
 application-*.yml
+!application.yml
 
 ############################
 # Frontend (Next.js)
