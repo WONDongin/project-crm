@@ -1,3 +1,4 @@
+// 루트 페이지 (ex: 로그인 or 리다이렉트)
 import Image from "next/image";
 
 export default function Home() {
