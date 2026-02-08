@@ -1,0 +1,1 @@
+// ADMIN_DASHBOARD: '/admin/dashboard', CONSULTANT_CUSTOMERS: '/consultant/customers'
