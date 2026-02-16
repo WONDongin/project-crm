@@ -31,7 +31,7 @@ public class InitDataConfig implements CommandLineRunner {
             admin.setEmail("admin@gmail.com");
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setName("관리자");
-            admin.setRoles("ADMIN");
+            admin.setRoles("ROLE_ADMIN");
             admin.setSpecialty("ALL");
             admin.setStatus("ACTIVE");
 
