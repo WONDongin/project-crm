@@ -1,4 +1,14 @@
 /gradlew text eol=lf
 *.bat text eol=crlf
+
+# Binary files
 *.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.woff binary
+*.woff2 binary
+
+# Default text normalization
 * text=auto eol=lf
