@@ -41,7 +41,8 @@ public class AuthService {
         // 4.JWT 생성
         String token = jwtUtil.generateToken(
                 user.getEmail(),
-                user.getRoles() // ex: ROLE_ADMIN
+                user.getRoles(), // ex: ROLE_ADMIN
+                user.getName()
         );
 
         return new LoginResponse(token, user.getRoles());

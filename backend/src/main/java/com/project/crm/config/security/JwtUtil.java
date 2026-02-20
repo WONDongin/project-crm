@@ -26,7 +26,7 @@ public class JwtUtil {
     }
 
     // JWT 생성
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, String role, String name) {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpiration);
@@ -34,6 +34,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("name", name)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -66,5 +67,10 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    // 이름 추출
+    public String getName(String token) {
+        return getClaims(token).get("name", String.class);
     }
 }

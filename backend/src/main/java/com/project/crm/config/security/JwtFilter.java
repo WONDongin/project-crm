@@ -1,5 +1,6 @@
 package com.project.crm.config.security;
 
+import com.project.crm.domain.user.dto.CustomPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -39,10 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String email = jwtUtil.getEmail(token);
             String role = jwtUtil.getRole(token);
+            String name = jwtUtil.getName(token);
 
-            System.out.println("===== JWT FILTER =====");
-            System.out.println("email = " + email);
-            System.out.println("role = " + role);
+            CustomPrincipal principal =
+                    new CustomPrincipal(email, name);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
