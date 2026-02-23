@@ -5,18 +5,12 @@ import axios from "axios";
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   timeout: 10000,
-  withCredentials: true,
+  withCredentials: true, // 쿠키 자동 포함
 });
 
 // 요청 인터셉터 - 토큰 자동 첨부
 apiClient.interceptors.request.use(
   (config) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
     return config;
   },
   (error) => Promise.reject(error),
@@ -29,12 +23,6 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401 && typeof window !== "undefined") {
-      console.warn("[API] 401 Unauthorized → redirect to login");
-
-      // 토큰 제거
-      localStorage.removeItem("accessToken");
-
-      // 현재 페이지가 로그인 페이지가 아닐 때만 이동
       if (!window.location.pathname.startsWith("/login")) {
         window.location.href = "/login";
       }

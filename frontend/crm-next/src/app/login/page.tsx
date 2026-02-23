@@ -52,9 +52,6 @@ export default function LoginPage() {
         throw new Error("권한 없음");
       }
 
-      // 로그인 성공
-      alert("로그인 성공");
-
       // 역활별 분기
       if (user.role === ROLES.ADMIN) {
         router.push("/admin/dashboard");
