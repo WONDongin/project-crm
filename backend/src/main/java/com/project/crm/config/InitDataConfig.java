@@ -39,5 +39,20 @@ public class InitDataConfig implements CommandLineRunner {
 
             System.out.println("관리자 계정 생성 완료");
         }
+
+        if (userRepository.findByEmail("cons@gmail.com").isEmpty()) {
+
+            User consultant = new User();
+            consultant.setEmail("cons@gmail.com");
+            consultant.setPassword(passwordEncoder.encode("cons000!"));
+            consultant.setName("원예슬");
+            consultant.setRoles("ROLE_CONSULTANT");
+            consultant.setSpecialty("BACKEND");
+            consultant.setStatus("ACTIVE");
+
+            userRepository.save(consultant);
+
+            System.out.println("상담사 계정 생성 완료");
+        }
     }
 }
