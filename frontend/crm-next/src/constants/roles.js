@@ -1,7 +1,7 @@
 // src/constants/roles.js
 export const ROLES = {
-  ADMIN: "ADMIN",
-  CONSULTANT: "CONSULTANT",
+  ADMIN: "ROLE_ADMIN",
+  CONSULTANT: "ROLE_CONSULTANT",
 };
 
 export const ROLE_LABELS = {

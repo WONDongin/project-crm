@@ -26,7 +26,7 @@ if (user.role !== "ROLE_CONSULTANT") {
         <h1>Consultant Dashboard</h1>
 
         <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <span>{user.name} 상담사</span>
+            <span>{user.name} 상담사 님</span>
             <LogoutButton />
         </div>
       </div>

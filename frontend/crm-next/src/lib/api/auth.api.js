@@ -7,10 +7,6 @@ export const login = async (data) => {
   try {
     const response = await apiClient.post("/auth/login", data);
 
-    if (response.data?.accessToken) {
-      localStorage.setItem("accessToken", response.data.accessToken);
-    }
-
     return response.data;
   } catch (error) {
     console.error("로그인 에러:", error);
@@ -23,7 +19,6 @@ export const logout = async () => {
   try {
     await apiClient.post("/auth/logout");
   } finally {
-    localStorage.removeItem("accessToken");
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }
