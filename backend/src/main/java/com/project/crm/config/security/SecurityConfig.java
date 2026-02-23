@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/auth/logout").permitAll()
                         .requestMatchers("/auth/me").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/consultant/**").hasRole("CONSULTANT")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
