@@ -1,11 +1,11 @@
 // 로그인/로그아웃 등 인증관련 API 호출 (login(), logout())
 // src/lib/api/auth.api.js
-import api from "./axios";
+import apiClient from "./axios";
 
 // 로그인
 export const login = async (data) => {
   try {
-    const response = await api.post("/auth/login", data);
+    const response = await apiClient.post("/auth/login", data);
 
     return response.data;
   } catch (error) {
@@ -17,7 +17,7 @@ export const login = async (data) => {
 // 로그아웃
 export const logout = async () => {
   try {
-    await api.post("/auth/logout");
+    await apiClient.post("/auth/logout");
   } finally {
     if (typeof window !== "undefined") {
       window.location.href = "/login";
