@@ -1,23 +1,49 @@
-// 사용자 관리 페이지
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { getUsers } from "@/lib/api/admin.api";
+
+import useCodeStore from "@/stores/codeStore";
+
+import { getCodeName } from "@/utils/codeUtil";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
 
+  const { codes, hydrated } = useCodeStore();
+
+  console.log("현재 codes =", codes);
+  console.log("hydrated =", hydrated);
+
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await getUsers();
+      try {
+        const res = await getUsers();
 
-      if (res.success) {
-        setUsers(res.data);
+        console.log("유저 API 응답 =", res);
+
+        if (res.success) {
+          setUsers(res.data);
+        }
+      } catch (error) {
+        console.error("사용자 조회 실패:", error);
       }
     };
 
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    console.log("USER_ROLE =", codes.USER_ROLE);
+
+    if (codes.USER_ROLE) {
+      console.log(
+        "ROLE_ADMIN 변환 결과 =",
+        getCodeName(codes, "USER_ROLE", "ROLE_ADMIN"),
+      );
+    }
+  }, [codes]);
 
   return (
     <div>
@@ -39,10 +65,15 @@ export default function AdminUsersPage() {
           {users.map((user) => (
             <tr key={user.userId}>
               <td>{user.name}</td>
+
               <td>{user.email}</td>
-              <td>{user.roles}</td>
-              <td>{user.specialty}</td>
-              <td>{user.status}</td>
+
+              <td>{getCodeName(codes, "USER_ROLE", user.roles)}</td>
+
+              <td>{getCodeName(codes, "USER_SPECIALTY", user.specialty)}</td>
+
+              <td>{getCodeName(codes, "USER_STATUS", user.status)}</td>
+
               <td>{user.lastLoginAt}</td>
             </tr>
           ))}
