@@ -30,7 +30,6 @@ export default async function layout({
       </div>
 
       <hr />
-
       {children}
     </div>
   );
