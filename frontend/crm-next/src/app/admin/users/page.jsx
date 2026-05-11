@@ -13,9 +13,6 @@ export default function AdminUsersPage() {
 
   const { codes, hydrated } = useCodeStore();
 
-  console.log("현재 codes =", codes);
-  console.log("hydrated =", hydrated);
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -44,6 +41,10 @@ export default function AdminUsersPage() {
       );
     }
   }, [codes]);
+
+  if (!hydrated) {
+    return <div>공통코드 로딩중...</div>;
+  }
 
   return (
     <div>

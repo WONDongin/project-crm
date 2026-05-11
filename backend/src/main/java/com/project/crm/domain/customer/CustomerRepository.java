@@ -1,5 +1,7 @@
 package com.project.crm.domain.customer;
-// JPA Repository 인터페이스
 
-public class CustomerRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+// 고객 리포지토리 (데이터베이스 접근)
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
 }
