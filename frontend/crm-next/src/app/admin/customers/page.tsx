@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getCustomers } from "@/lib/api/admin.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
+import styles from "../AdminLayout.module.css";
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -34,10 +35,10 @@ export default function AdminCustomersPage() {
   }
 
   return (
-    <div>
-      <h2>고객 관리</h2>
+    <div className={styles.pageCard}>
+      <h2 className={styles.pageTitle}>고객 관리</h2>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table className={styles.table}>
         <thead>
           <tr>
             <th>고객명</th>
@@ -66,7 +67,7 @@ export default function AdminCustomersPage() {
               <td>{customer.counselorName ?? "미지정"}</td>
 
               <td>
-                <select>
+                <select className={styles.statusSelect}>
                   <option value="">선택</option>
                 </select>
               </td>
