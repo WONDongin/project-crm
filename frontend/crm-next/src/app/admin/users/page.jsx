@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { getUsers } from "@/lib/api/admin.api";
-
 import useCodeStore from "@/stores/codeStore";
-
 import { getCodeName } from "@/utils/codeUtil";
+import styles from "../AdminLayout.module.css";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -47,10 +45,10 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div>
-      <h2>사용자 관리</h2>
+    <div className={styles.pageCard}>
+      <h2 className={styles.pageTitle}>사용자 관리</h2>
 
-      <table border="1">
+      <table className={styles.table}>
         <thead>
           <tr>
             <th>이름</th>

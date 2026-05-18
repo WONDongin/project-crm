@@ -1,0 +1,152 @@
+/* LoginPage.module.css */
+
+.loginPage {
+  min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f6fa;
+
+  padding: 20px;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 420px;
+
+  background: white;
+
+  border-radius: 24px;
+
+  padding: 42px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.logoBox {
+  text-align: center;
+
+  margin-bottom: 36px;
+}
+
+.logo {
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 20px;
+
+  border-radius: 20px;
+
+  background: #111827;
+
+  color: white;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 10px;
+}
+
+.desc {
+  font-size: 15px;
+
+  color: #6b7280;
+}
+
+.form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.inputGroup {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #374151;
+}
+
+.input {
+  height: 52px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  color: #999;
+  padding: 0 16px;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  border-color: #111827;
+
+  box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
+}
+
+.loginButton {
+  height: 54px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #111827;
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  margin-top: 10px;
+}
+
+.loginButton:hover {
+  background: #1f2937;
+}
+
+.errorBox {
+  background: #fef2f2;
+
+  color: #dc2626;
+
+  border: 1px solid #fecaca;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+}
