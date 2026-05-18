@@ -1,0 +1,405 @@
+/* app/consultant/ConsultantLayout.module.css */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f6fa;
+}
+
+/* 사이드바 */
+.sidebar {
+  width: 240px;
+  background-color: #111827;
+  color: white;
+  padding: 24px 20px;
+  position: fixed;
+  height: 100vh;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+.userBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userName {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.menuTitle {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menuItem {
+  margin-bottom: 10px;
+}
+
+.menuLink {
+  display: block;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  color: white;
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+}
+
+.menuLink:hover {
+  background-color: #1f2937;
+}
+
+/* 메인 컨텐츠 */
+.main {
+  flex: 1;
+  margin-left: 240px;
+  padding: 40px;
+}
+
+/* 공통 페이지 박스 */
+.pageCard {
+  background: white;
+
+  border-radius: 16px;
+
+  padding: 28px;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+/* 테이블 */
+.table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  margin-top: 20px;
+}
+
+.table thead tr {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table th {
+  padding: 16px 12px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-align: left;
+
+  color: #374151;
+}
+
+.table td {
+  padding: 18px 12px;
+
+  border-bottom: 1px solid #f1f5f9;
+
+  font-size: 14px;
+
+  color: #111827;
+}
+
+.table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* 상태 뱃지 */
+.badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 60px;
+
+  padding: 6px 12px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: white;
+
+  background-color: #111827;
+}
+
+/* 버튼 */
+.detailButton {
+  border: none;
+
+  background-color: #111827;
+
+  color: white;
+
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.detailButton:hover {
+  background-color: #374151;
+}
+
+.saveButton {
+  border: none;
+
+  background: #111827;
+
+  color: white;
+
+  padding: 8px 14px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background: #d1d5db;
+
+  cursor: not-allowed;
+}
+
+/* 상태 select */
+
+.statusSelect {
+  min-width: 120px;
+  height: 42px;
+
+  padding: 0 38px 0 14px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  background-color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  color: #111827;
+
+  cursor: pointer;
+
+  outline: none;
+
+  transition: all 0.2s ease;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* 화살표 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.statusSelect:hover {
+  border-color: #d1d5db;
+}
+
+.statusSelect:focus {
+  border-color: #111827;
+
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+/* =========================
+   Dashboard
+========================= */
+
+.dashboardHeader {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 32px;
+}
+
+.dashboardTitle {
+  font-size: 32px;
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 8px;
+}
+
+.dashboardDesc {
+  font-size: 15px;
+
+  color: #6b7280;
+}
+
+.moveButton {
+  border: none;
+
+  background: #111827;
+
+  color: white;
+
+  padding: 14px 20px;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.moveButton:hover {
+  background: #1f2937;
+}
+
+/* =========================
+   Stats
+========================= */
+
+.statsGrid {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 24px;
+
+  margin-bottom: 32px;
+}
+
+.statsCard {
+  background: white;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 20px;
+
+  padding: 28px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  transition: all 0.2s ease;
+}
+
+.statsCard:hover {
+  transform: translateY(-2px);
+}
+
+.activeCard {
+  background: #111827;
+
+  color: white;
+}
+
+.activeCard .statsLabel,
+.activeCard .statsChange,
+.activeCard .statsIcon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.activeCard .statsValue {
+  color: white;
+}
+
+.statsTop {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 26px;
+}
+
+.statsLabel {
+  font-size: 15px;
+  font-weight: 600;
+
+  color: #6b7280;
+}
+
+.statsIcon {
+  font-size: 20px;
+}
+
+.statsValue {
+  font-size: 46px;
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 10px;
+}
+
+.statsChange {
+  font-size: 14px;
+
+  color: #6b7280;
+}
+
+/* =========================
+   Dashboard Table
+========================= */
+
+.dashboardTableCard {
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 28px;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tableHeader {
+  margin-bottom: 20px;
+}
+
+.tableTitle {
+  font-size: 24px;
+  font-weight: 700;
+
+  color: #111827;
+}
