@@ -1,0 +1,44 @@
+.applyPage {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f6f8;
+  padding: 40px 0;
+}
+
+.applyCard {
+  width: 600px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.successBox {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #e8f8ec;
+  color: #2e7d32;
+}
+
+.applyButton {
+  width: 100%;
+  height: 52px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #111827;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
