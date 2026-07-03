@@ -1,44 +1,165 @@
+/* ConsultPage.module.css */
+
 .applyPage {
   min-height: 100vh;
+  background: #f5f7fa;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f4f6f8;
-  padding: 40px 0;
+  padding: 40px 20px;
 }
 
 .applyCard {
-  width: 600px;
+  width: 100%;
+  max-width: 720px;
   background: #fff;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
+.logoBox {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.logo {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #111827;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.desc {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  margin: 28px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.inputGroup label {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input,
+.select,
 .textarea {
   width: 100%;
-  padding: 12px;
-  resize: vertical;
-  border: 1px solid #ddd;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
+  font-size: 15px;
+  transition: 0.2s;
+  outline: none;
+  background: #fff;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.radioItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.radioItem input {
+  cursor: pointer;
+}
+
+.errorBox {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 14px;
 }
 
 .successBox {
-  margin-top: 10px;
+  margin-top: 8px;
+  margin-bottom: 16px;
   padding: 12px;
   border-radius: 8px;
-  background: #e8f8ec;
-  color: #2e7d32;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  font-size: 14px;
 }
 
 .applyButton {
   width: 100%;
-  height: 52px;
-  margin-top: 16px;
+  height: 50px;
+  margin-top: 12px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #111827;
-  color: white;
+  color: #fff;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.applyButton:hover {
+  background: #1f2937;
+}
+
+.applyButton:active {
+  transform: scale(0.99);
 }
