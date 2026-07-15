@@ -40,6 +40,10 @@ public class ActivityLog {
     @Column(name = "consult_type", length = 20)
     private String consultType;
 
+    // 상담 희망 시간
+    @Column(name = "preferred_time", length = 20)
+    private String preferredTime;
+    
     // 상담 결과
     @Column(name = "activity_result", nullable = false, length = 20)
     private String activityResult;

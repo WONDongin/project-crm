@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.crm.domain.customer.CustomerService;
 import com.project.crm.domain.customer.dto.ConsultApplyRequestDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,7 +22,7 @@ public class ConsultController {
     // 상담 신청
     @PostMapping("/apply")
     public ResponseEntity<Void> apply(
-            @RequestBody ConsultApplyRequestDto request
+            @Valid @RequestBody ConsultApplyRequestDto request
     ) {
 
         customerService.applyConsult(request);
