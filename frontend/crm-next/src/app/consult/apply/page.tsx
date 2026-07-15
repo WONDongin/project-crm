@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 import { applyConsult } from "@/lib/api/consult.api";
 import { CommonCode } from "@/types/commonCode";
 import useCodeStore from "@/stores/codeStore";
@@ -26,8 +26,8 @@ export default function ConsultApplyPage() {
     leadSource: "",
   });
 
+  const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const handleChange = (
     e:
@@ -68,6 +68,10 @@ export default function ConsultApplyPage() {
       return "관심 과정을 선택하세요.";
     }
 
+    if (!form.preferredTime) {
+      return "상담 희망 시간대를 선택하세요.";
+    }
+
     if (!form.content.trim()) {
       return "상담 희망 내용을 입력하세요.";
     }
@@ -83,7 +87,6 @@ export default function ConsultApplyPage() {
     e.preventDefault();
 
     setErrorMessage("");
-    setSuccessMessage("");
 
     const validationError = validate();
 
@@ -94,19 +97,8 @@ export default function ConsultApplyPage() {
 
     try {
       await applyConsult(form);
-
-      setSuccessMessage("상담 신청이 완료되었습니다.");
-
-      setForm({
-        name: "",
-        birthDate: "",
-        phone: "",
-        email: "",
-        interestCourse: "",
-        preferredTime: "",
-        content: "",
-        leadSource: "",
-      });
+      // 완료 페이지 이동
+      router.push("/consult/complete");
     } catch (error) {
       console.error(error);
 
@@ -132,7 +124,6 @@ export default function ConsultApplyPage() {
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* 기본 정보 */}
           <h3 className={styles.sectionTitle}>기본 정보</h3>
-
           <div className={styles.inputGroup}>
             <label>이름 *</label>
 
@@ -145,7 +136,6 @@ export default function ConsultApplyPage() {
               placeholder="이름을 입력하세요."
             />
           </div>
-
           <div className={styles.inputGroup}>
             <label>생년월일 *</label>
 
@@ -157,7 +147,6 @@ export default function ConsultApplyPage() {
               className={styles.input}
             />
           </div>
-
           <div className={styles.inputGroup}>
             <label>연락처 *</label>
 
@@ -170,7 +159,6 @@ export default function ConsultApplyPage() {
               placeholder="010-0000-0000"
             />
           </div>
-
           <div className={styles.inputGroup}>
             <label>이메일</label>
 
@@ -183,10 +171,8 @@ export default function ConsultApplyPage() {
               placeholder="example@email.com"
             />
           </div>
-
           {/* 상담 정보 */}
           <h3 className={styles.sectionTitle}>상담 정보</h3>
-
           <div className={styles.inputGroup}>
             <label>관심 과정 *</label>
 
@@ -205,7 +191,6 @@ export default function ConsultApplyPage() {
               ))}
             </select>
           </div>
-
           <div className={styles.inputGroup}>
             <label>상담 희망 내용 *</label>
 
@@ -218,9 +203,8 @@ export default function ConsultApplyPage() {
               placeholder="상담 내용을 입력하세요."
             />
           </div>
-
           <div className={styles.inputGroup}>
-            <label>상담 희망 시간대</label>
+            <label>상담 희망 시간대 *</label>
 
             <select
               name="preferredTime"
@@ -229,15 +213,16 @@ export default function ConsultApplyPage() {
               className={styles.select}
             >
               <option value="">선택하세요.</option>
-              <option value="MORNING">오전 (09:00 ~ 12:00)</option>
-              <option value="AFTERNOON">오후 (13:00 ~ 18:00)</option>
-              <option value="EVENING">저녁 (18:00 ~ 21:00)</option>
+
+              {codes.CONSULT_TIME?.map((time: CommonCode) => (
+                <option key={time.code} value={time.code}>
+                  {time.name}
+                </option>
+              ))}
             </select>
           </div>
-
           {/* 유입 경로 */}
           <h3 className={styles.sectionTitle}>유입 경로</h3>
-
           <div className={styles.radioGroup}>
             {codes.LEAD_SOURCE?.map((source: CommonCode) => (
               <label key={source.code} className={styles.radioItem}>
@@ -253,15 +238,9 @@ export default function ConsultApplyPage() {
               </label>
             ))}
           </div>
-
           {errorMessage && (
             <div className={styles.errorBox}>{errorMessage}</div>
           )}
-
-          {successMessage && (
-            <div className={styles.successBox}>{successMessage}</div>
-          )}
-
           <button type="submit" className={styles.applyButton}>
             상담 신청
           </button>

@@ -17,6 +17,7 @@ public class ActivityLogService {
     // 상담 신청시  ACTIVITY_LOG 자동 생성
     public void createReceivedLog(
             Customer customer,
+            String preferredTime,
             String content
     ) {
 
@@ -24,6 +25,7 @@ public class ActivityLogService {
                 .customer(customer)
                 .createdBy("SYSTEM")
                 .activityResult("RECEIVED")
+                .preferredTime(preferredTime)
                 .content(content)
                 .build();
 

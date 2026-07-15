@@ -109,6 +109,7 @@ public class CustomerService {
 
         activityLogService.createReceivedLog(
                 customer,
+                request.getPreferredTime(),
                 request.getContent()
         );
 }

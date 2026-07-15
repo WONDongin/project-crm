@@ -163,3 +163,53 @@
 .applyButton:active {
   transform: scale(0.99);
 }
+
+/* complete */
+.completeCard {
+  width: 100%;
+  max-width: 520px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 60px 40px;
+  border-radius: 16px;
+  background-color: #ffffff;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.completeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background-color: #eef7ff;
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.completeTitle {
+  margin-bottom: 16px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.completeDescription {
+  margin-bottom: 32px;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.completeButton {
+  display: inline-block;
+  padding: 14px 24px;
+  border-radius: 8px;
+  background-color: #222222;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
