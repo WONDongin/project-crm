@@ -4,12 +4,17 @@
 import { useEffect, useState } from "react";
 
 import useCodeStore from "@/stores/codeStore";
+import FeedbackModal from "@/components/common/FeedbackModal";
+
+import { CommonCode } from "@/types/commonCode";
+import { ConsCustomer } from "@/types/conscustomer";
 
 import { getCodeName } from "@/utils/codeUtil";
 
-import { ConsCustomer } from "@/types/conscustomer";
-
-import { getConscustomers } from "@/lib/api/consultant.api";
+import {
+  getConscustomers,
+  updateConsCustomer,
+} from "@/lib/api/consultant.api";
 
 import styles from "../ConsultantLayout.module.css";
 
@@ -20,6 +25,15 @@ export default function CustomersPage() {
   const [changedStatuses, setChangedStatuses] = useState<
     Record<number, string>
   >({});
+  const [changedTags, setChangedTags] = useState<Record<number, string>>({});
+  const [savingCustomers, setSavingCustomers] = useState<
+    Record<number, boolean>
+  >({});
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+  } | null>(null);
 
   const { codes, hydrated } = useCodeStore();
 
@@ -42,11 +56,117 @@ export default function CustomersPage() {
   }, []);
 
   // 상태 변경 처리
-  const handleStatusChange = (customerId: number, newStatus: string) => {
-    setChangedStatuses((prev) => ({
-      ...prev,
-      [customerId]: newStatus,
-    }));
+  const handleStatusChange = (
+    customerId: number,
+    newStatus: string,
+    originalStatus: string,
+  ) => {
+    setChangedStatuses((prev) => {
+      const next = { ...prev };
+
+      // 기존 상태와 같으면 변경 목록에서 제거
+      if (newStatus === originalStatus) {
+        delete next[customerId];
+      } else {
+        next[customerId] = newStatus;
+      }
+
+      return next;
+    });
+  };
+
+  const handleTagChange = (
+    customerId: number,
+    newTag: string,
+    originalTag: string | null,
+  ) => {
+    setChangedTags((prev) => {
+      const next = { ...prev };
+
+      if (newTag === (originalTag ?? "")) {
+        delete next[customerId];
+      } else {
+        next[customerId] = newTag;
+      }
+
+      return next;
+    });
+  };
+
+  const handleSaveCustomer = async (customer: ConsCustomer) => {
+    const { customerId } = customer;
+    const status = changedStatuses[customerId];
+    const hasTagChange = changedTags[customerId] !== undefined;
+    const customerTag = changedTags[customerId];
+
+    if ((!status && !hasTagChange) || savingCustomers[customerId]) {
+      return;
+    }
+
+    const updates: { status?: string; customerTag?: string } = {};
+    if (status) {
+      updates.status = status;
+    }
+    if (hasTagChange) {
+      updates.customerTag = customerTag;
+    }
+
+    setSavingCustomers((prev) => ({ ...prev, [customerId]: true }));
+
+    try {
+      const response = await updateConsCustomer(customerId, updates);
+
+      if (!response.success) {
+        throw new Error(response.message || "고객 정보 저장에 실패했습니다.");
+      }
+
+      setCustomers((prev) =>
+        prev.map((customer) =>
+          customer.customerId === customerId
+            ? {
+                ...customer,
+                ...(status ? { status } : {}),
+                ...(hasTagChange
+                  ? { customerTag: customerTag || null }
+                  : {}),
+              }
+            : customer,
+        ),
+      );
+      setChangedStatuses((prev) => {
+        const next = { ...prev };
+        delete next[customerId];
+        return next;
+      });
+      setChangedTags((prev) => {
+        const next = { ...prev };
+        delete next[customerId];
+        return next;
+      });
+      setFeedback({
+        type: "success",
+        title: "저장 완료",
+        message: response.message || "변경사항이 정상적으로 저장되었습니다.",
+      });
+    } catch (error) {
+      console.error("고객 정보 저장 에러:", error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다.";
+      setFeedback({
+        type: "error",
+        title: "저장 실패",
+        message: `고객 정보 저장에 실패했습니다. ${message}`,
+      });
+    } finally {
+      setSavingCustomers((prev) => {
+        const next = { ...prev };
+        delete next[customerId];
+        return next;
+      });
+    }
   };
 
   // 공통코드 로딩 전
@@ -68,7 +188,7 @@ export default function CustomersPage() {
             <th>고객 태그</th>
             <th>최근 상담일</th>
             <th>유입 경로</th>
-            <th>상세보기</th>
+            <th>상담 기록</th>
             <th>저장</th>
           </tr>
         </thead>
@@ -101,7 +221,7 @@ export default function CustomersPage() {
                   )}
                 </td>
 
-                {/* 상태 변경 select */}
+                {/* 고객 상태 변경 */}
                 <td>
                   <select
                     className={styles.statusSelect}
@@ -109,21 +229,46 @@ export default function CustomersPage() {
                       changedStatuses[customer.customerId] ?? customer.status
                     }
                     onChange={(e) =>
-                      handleStatusChange(customer.customerId, e.target.value)
+                      handleStatusChange(
+                        customer.customerId,
+                        e.target.value,
+                        customer.status,
+                      )
                     }
                   >
-                    <option value="NEW">신규</option>
-
-                    <option value="IN_PROGRESS">수강</option>
-
-                    <option value="DORMANT">미활동</option>
-
-                    <option value="DROP">탈퇴</option>
+                    {codes.CUSTOMER_STATUS?.map((status: CommonCode) => (
+                      <option key={status.code} value={status.code}>
+                        {status.name}
+                      </option>
+                    ))}
                   </select>
                 </td>
 
                 <td>
-                  {getCodeName(codes, "CUSTOMER_TAG", customer.customerTag)}
+                  <div className={styles.tagEditor}>
+                    <select
+                      className={styles.statusSelect}
+                      value={
+                        changedTags[customer.customerId] ??
+                        customer.customerTag ??
+                        ""
+                      }
+                      onChange={(e) =>
+                        handleTagChange(
+                          customer.customerId,
+                          e.target.value,
+                          customer.customerTag,
+                        )
+                      }
+                    >
+                      <option value="">태그 선택</option>
+                      {codes.CUSTOMER_TAG?.map((tag: CommonCode) => (
+                        <option key={tag.code} value={tag.code}>
+                          {tag.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </td>
 
                 <td>
@@ -136,18 +281,23 @@ export default function CustomersPage() {
                   {getCodeName(codes, "LEAD_SOURCE", customer.leadSource)}
                 </td>
 
-                {/* 상세보기 */}
+                {/* 상담 기록 */}
                 <td>
-                  <button className={styles.detailButton}>상세보기</button>
+                  <button className={styles.detailButton}>상담 기록</button>
                 </td>
 
                 {/* 저장 버튼 */}
                 <td>
                   <button
                     className={styles.saveButton}
-                    disabled={!changedStatuses[customer.customerId]}
+                    disabled={
+                      (!changedStatuses[customer.customerId] &&
+                        changedTags[customer.customerId] === undefined) ||
+                      savingCustomers[customer.customerId]
+                    }
+                    onClick={() => handleSaveCustomer(customer)}
                   >
-                    저장
+                    {savingCustomers[customer.customerId] ? "저장 중..." : "저장"}
                   </button>
                 </td>
               </tr>
@@ -155,6 +305,14 @@ export default function CustomersPage() {
           )}
         </tbody>
       </table>
+      {feedback && (
+        <FeedbackModal
+          type={feedback.type}
+          title={feedback.title}
+          message={feedback.message}
+          onClose={() => setFeedback(null)}
+        />
+      )}
     </div>
   );
 }

@@ -12,4 +12,10 @@ public interface CodeRepository extends JpaRepository<Code, CodeId> {
             String codeGroup,
             String useYn
     );
+
+    boolean existsByCodeGroupAndCodeValAndUseYn(
+            String codeGroup,
+            String codeVal,
+            String useYn
+    );
 }
