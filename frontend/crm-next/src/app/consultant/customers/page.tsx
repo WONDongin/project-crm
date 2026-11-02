@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import useCodeStore from "@/stores/codeStore";
 import FeedbackModal from "@/components/common/FeedbackModal";
@@ -209,7 +210,14 @@ export default function CustomersPage() {
           ) : (
             customers.map((customer) => (
               <tr key={customer.customerId}>
-                <td>{customer.name}</td>
+                <td>
+                  <Link
+                    href={`/consultant/customers/${customer.customerId}`}
+                    className={styles.customerLink}
+                  >
+                    {customer.name}
+                  </Link>
+                </td>
 
                 <td>{customer.phone}</td>
 
@@ -316,3 +324,4 @@ export default function CustomersPage() {
     </div>
   );
 }
+

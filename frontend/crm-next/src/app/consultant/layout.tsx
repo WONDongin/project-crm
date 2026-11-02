@@ -26,7 +26,7 @@ export default async function layout({
       <CodeInitializer />
 
       <aside className={styles.sidebar}>
-        <h1 className={styles.logo}>Consultant</h1>
+        <div className={styles.logo}>Consultant</div>
 
         <div className={styles.userBox}>
           <span className={styles.userName}>{user.name} 상담사 님</span>
@@ -55,3 +55,4 @@ export default async function layout({
     </div>
   );
 }
+
