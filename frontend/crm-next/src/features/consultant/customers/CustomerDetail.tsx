@@ -1,13 +1,14 @@
 // 상담사 고객 상세 정보 화면
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import { getConsCustomerDetail } from "@/lib/api/consultant.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
 import type { CustomerDetail as CustomerDetailData } from "@/types/customerDetail";
+import CustomerHistory from "./CustomerHistory";
 import styles from "./CustomerDetail.module.css";
 
 type DetailState =
@@ -56,6 +57,11 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
     return () => controller.abort();
   }, [customerId, validId, attempt]);
 
+  const handleHistoryRestricted = useCallback(() => {
+    setState({ status: "error", canRetry: false,
+      message: "조회할 수 없는 고객입니다. 담당 고객 목록을 확인해 주세요." });
+  }, []);
+
   const codeName = (group: string, value: string | null) =>
     value ? getCodeName(codes, group, value) : "-";
 
@@ -70,7 +76,7 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
       <header className={styles.header}>
         <div>
           <h1>{customer ? `${customer.name} 고객` : "고객 상세"}</h1>
-          <p>고객 기본 정보와 최근 상담 신청</p>
+          <p>고객 기본 정보와 상담 신청·이력</p>
         </div>
         {customer && (
           <span className={styles.status}>
@@ -148,8 +154,11 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
               <p className={styles.empty}>등록된 상담 신청 정보가 없습니다.</p>
             )}
           </section>
+          {state.status === "ready" && <CustomerHistory key={customerId} customerId={customerId}
+            onRestricted={handleHistoryRestricted} />}
         </div>
       )}
     </div>
   );
 }
+

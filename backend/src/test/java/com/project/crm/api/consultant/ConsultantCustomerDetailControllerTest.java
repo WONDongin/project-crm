@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import com.project.crm.domain.activity.dto.ActivityLogPageResponseDto;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
@@ -87,8 +88,64 @@ class ConsultantCustomerDetailControllerTest {
         verifyNoInteractions(detailService);
     }
 
+    @Test
+    void historyUsesAuthenticatedCounselorAndReturnsPageMetadata() throws Exception {
+        given(userRepository.findByEmail("owner@example.com"))
+                .willReturn(Optional.of(User.builder().userId(7L).build()));
+        given(detailService.getHistory(10L, 7L, 1)).willReturn(new ActivityLogPageResponseDto(
+                List.of(new ActivityLogPageResponseDto.Entry(3L, "SYSTEM", null, null,
+                        "RECEIVED", "PM", "신청 내용", null, null)), 1, 5, 6, 2));
+        mockMvc.perform(get("/consultant/customers/10/activities?page=1&size=100&counselorId=999&sort=activityId,asc")
+                        .with(authentication(login("ROLE_CONSULTANT"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.number").value(1))
+                .andExpect(jsonPath("$.data.size").value(5))
+                .andExpect(jsonPath("$.data.totalElements").value(6))
+                .andExpect(jsonPath("$.data.totalPages").value(2))
+                .andExpect(jsonPath("$.data.content[0].content").value("신청 내용"))
+                .andExpect(jsonPath("$.data.content[0].counselor").doesNotExist());
+        verify(detailService).getHistory(10L, 7L, 1);
+    }
+
+    @Test
+    void historyDefaultsToFirstPageAndRejectsMalformedPage() throws Exception {
+        given(userRepository.findByEmail("owner@example.com"))
+                .willReturn(Optional.of(User.builder().userId(7L).build()));
+        given(detailService.getHistory(10L, 7L, 0))
+                .willReturn(new ActivityLogPageResponseDto(List.of(), 0, 5, 0, 0));
+        mockMvc.perform(get("/consultant/customers/10/activities")
+                        .with(authentication(login("ROLE_CONSULTANT"))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.content").isEmpty());
+        mockMvc.perform(get("/consultant/customers/10/activities?page=abc")
+                        .with(authentication(login("ROLE_CONSULTANT"))))
+                .andExpect(status().isBadRequest());
+        given(detailService.getHistory(10L, 7L, -1))
+                .willThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        mockMvc.perform(get("/consultant/customers/10/activities?page=-1")
+                        .with(authentication(login("ROLE_CONSULTANT"))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void historyBlocksAnonymousAdminMissingUserAndWrongOwner() throws Exception {
+        mockMvc.perform(get("/consultant/customers/10/activities")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/consultant/customers/10/activities")
+                        .with(authentication(login("ROLE_ADMIN")))).andExpect(status().isForbidden());
+        verifyNoInteractions(detailService, userRepository);
+        given(userRepository.findByEmail("owner@example.com")).willReturn(Optional.empty());
+        mockMvc.perform(get("/consultant/customers/10/activities")
+                        .with(authentication(login("ROLE_CONSULTANT")))).andExpect(status().isUnauthorized());
+        given(userRepository.findByEmail("owner@example.com"))
+                .willReturn(Optional.of(User.builder().userId(7L).build()));
+        given(detailService.getHistory(10L, 7L, 0))
+                .willThrow(new ResponseStatusException(HttpStatus.FORBIDDEN));
+        mockMvc.perform(get("/consultant/customers/10/activities")
+                        .with(authentication(login("ROLE_CONSULTANT")))).andExpect(status().isForbidden());
+    }
+
     private UsernamePasswordAuthenticationToken login(String role) {
         return new UsernamePasswordAuthenticationToken("owner@example.com", null,
                 List.of(new SimpleGrantedAuthority(role)));
     }
 }
+

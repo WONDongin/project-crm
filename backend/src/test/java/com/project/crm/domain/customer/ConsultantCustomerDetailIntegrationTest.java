@@ -126,6 +126,90 @@ class ConsultantCustomerDetailIntegrationTest {
         assertThat(application.receivedAt()).isEqualTo(receivedAt);
     }
 
+    @Test
+    void historyPagesAllRecordsByDateThenIdAndKeepsOriginalData() {
+        LocalDateTime date = LocalDateTime.of(2026, 11, 2, 12, 0);
+        java.util.List<Long> ids = new java.util.ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            ActivityLog record = log(customer, i % 2 == 0 ? "SYSTEM" : "CONSULTANT",
+                    i % 2 == 0 ? "RECEIVED" : "COMPLETED", "기록 " + i, "PM");
+            record.setCounselor(i % 2 == 0 ? null : owner);
+            record.setConsultType("PHONE");
+            record.setNextAction("다음 주 연락");
+            entityManager.flush();
+            setReceivedAt(record, date);
+            ids.add(record.getActivityId());
+        }
+        ActivityLog older = log(customer, "SYSTEM", "RECEIVED", "과거 기록", "AM");
+        setReceivedAt(older, date.minusDays(1));
+        Customer another = entityManager.persistAndFlush(Customer.builder()
+                .name("다른 고객").phone("010-0000-0000").interestCourse("JAVA")
+                .leadSource("WEB").status("NEW").counselor(owner).build());
+        log(another, "SYSTEM", "RECEIVED", "다른 고객 신청", "AM");
+        entityManager.clear();
+
+        var first = detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 0);
+        var second = detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 1);
+        var third = detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 2);
+        assertThat(first.size()).isEqualTo(5);
+        assertThat(first.number()).isZero();
+        assertThat(first.totalElements()).isEqualTo(12);
+        assertThat(first.totalPages()).isEqualTo(3);
+        java.util.Collections.reverse(ids);
+        assertThat(first.content()).extracting(entry -> entry.activityId()).containsExactlyElementsOf(ids.subList(0, 5));
+        assertThat(second.content()).extracting(entry -> entry.activityId()).containsExactlyElementsOf(ids.subList(5, 10));
+        assertThat(third.content()).extracting(entry -> entry.activityId()).containsExactly(ids.get(10), older.getActivityId());
+        assertThat(first.content().get(0).createdBy()).isEqualTo("SYSTEM");
+        assertThat(first.content().get(0).counselorName()).isNull();
+        assertThat(first.content().get(1).counselorName()).isEqualTo(owner.getName());
+        assertThat(first.content().get(1).consultType()).isEqualTo("PHONE");
+        assertThat(first.content().get(1).nextAction()).isEqualTo("다음 주 연락");
+        assertThat(first.content().get(0).content()).isEqualTo("기록 10");
+        assertThat(first.content().get(0).preferredTime()).isEqualTo("PM");
+        assertThat(first.content().get(0).createdAt()).isEqualTo(date);
+        assertThat(detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 3).content()).isEmpty();
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(entityManager.find(Customer.class, customer.getCustomerId()).getLastActivityAt()).isNull();
+        assertThat(entityManager.find(ActivityLog.class, ids.get(0)).getContent()).isEqualTo("기록 10");
+    }
+
+    @Test
+    void emptyHistoryAndInvalidPage() {
+        var page = detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 0);
+        assertThat(page.content()).isEmpty();
+        assertThat(page.totalElements()).isZero();
+        assertThat(page.totalPages()).isZero();
+        assertThatThrownBy(() -> detailService.getHistory(customer.getCustomerId(), owner.getUserId(), -1))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode().value()).isEqualTo(400));
+    }
+
+    @Test
+    void historyChecksCurrentOwnerAndIncludesPreviousCounselorsRecords() {
+        ActivityLog previous = log(customer, "CONSULTANT", "COMPLETED", "이전 상담사 기록", null);
+        previous.setCounselor(owner);
+        entityManager.flush();
+        assertHistoryForbidden(customer.getCustomerId(), other.getUserId());
+        assertHistoryForbidden(Long.MAX_VALUE, owner.getUserId());
+        customer.setCounselor(other);
+        entityManager.flush();
+        entityManager.clear();
+        assertHistoryForbidden(customer.getCustomerId(), owner.getUserId());
+        assertThat(detailService.getHistory(customer.getCustomerId(), other.getUserId(), 0).content())
+                .extracting(entry -> entry.activityId()).containsExactly(previous.getActivityId());
+        entityManager.find(Customer.class, customer.getCustomerId()).setCounselor(null);
+        entityManager.flush();
+        entityManager.clear();
+        assertHistoryForbidden(customer.getCustomerId(), other.getUserId());
+    }
+
+    private void assertHistoryForbidden(Long customerId, Long counselorId) {
+        assertThatThrownBy(() -> detailService.getHistory(customerId, counselorId, 0))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode().value()).isEqualTo(403));
+    }
+
     private User user(String email) {
         return entityManager.persistAndFlush(User.builder().email(email).password("test-hash")
                 .name(email).roles("ROLE_CONSULTANT").status("ACTIVE").build());
@@ -148,3 +232,4 @@ class ConsultantCustomerDetailIntegrationTest {
                         exception -> assertThat(exception.getStatusCode().value()).isEqualTo(403));
     }
 }
+

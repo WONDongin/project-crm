@@ -62,3 +62,22 @@
   .section { padding: 20px; }
   .fields, .applicationFields { grid-template-columns: minmax(0, 1fr); }
 }
+
+.history { grid-column: 1 / -1; }
+.historyHeading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; }
+.historyHeading h2, .historyHeading h3 { margin: 0; }
+.historyHeading h3 { font-size: 15px; font-weight: 600; }
+.historyHeading > span, .historyHeading time { color: var(--detail-muted); font-size: 13px; }
+.historyList { list-style: none; margin: 16px 0 0; padding: 0; }
+.historyEntry { padding: 20px 0; border-top: 1px solid var(--detail-line); }
+.historyFields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 16px 0 0; }
+.historyPagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
+.historyPagination button { min-height: 44px; padding: 8px 16px; background: var(--detail-surface); color: var(--detail-ink); border: 1px solid var(--detail-line); border-radius: 8px; cursor: pointer; }
+.historyPagination button:disabled { color: var(--detail-muted); background: var(--detail-subtle); cursor: default; }
+.historyPagination button:focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 4px; }
+@media (max-width: 768px) {
+  .historyFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .historyFields { grid-template-columns: minmax(0, 1fr); }
+}

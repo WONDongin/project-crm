@@ -59,3 +59,11 @@ export const updateConsCustomer = async (customerId, updates) => {
     throw error;
   }
 };
+
+// 상담 신청 접수 및 상담 이력: 서버에서 5건씩 최신순 조회
+export const getConsCustomerHistory = async (customerId, page = 0, signal) => {
+  const response = await api.get(`/consultant/customers/${customerId}/activities`, {
+    params: { page }, signal,
+  });
+  return response.data;
+};
