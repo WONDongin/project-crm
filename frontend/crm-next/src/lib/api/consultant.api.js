@@ -59,4 +59,3 @@ export const updateConsCustomer = async (customerId, updates) => {
     throw error;
   }
 };
-
