@@ -24,3 +24,20 @@ export const getCustomers = async () => {
     throw error;
   }
 };
+
+// 배정 가능한 활성 상담사 목록 조회
+export const getAssignableCounselors = async () => {
+  const response = await api.get("/admin/customers/counselors");
+
+  return response.data;
+};
+
+// 고객 담당 상담사 배정 및 변경
+export const assignCustomerCounselor = async (customerId, counselorId) => {
+  const response = await api.patch(
+    `/admin/customers/${customerId}/counselor`,
+    { counselorId },
+  );
+
+  return response.data;
+};

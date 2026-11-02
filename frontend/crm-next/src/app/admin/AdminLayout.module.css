@@ -356,3 +356,49 @@
 
   box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
 }
+
+/* 고객 관리 테이블 */
+.customerTableScroll {
+  overflow-x: auto;
+}
+
+.table td.customerEmpty {
+  padding: 32px 12px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* 담당 상담사 저장 버튼 */
+.assignmentSaveButton {
+  min-width: 80px;
+  height: 42px;
+  padding: 0 16px;
+
+  border: none;
+  border-radius: 10px;
+
+  background-color: #111827;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.assignmentSaveButton:hover:not(:disabled) {
+  background-color: #1f2937;
+}
+
+.assignmentSaveButton:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.statusSelect:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
