@@ -3,6 +3,9 @@ package com.project.crm.domain.customer;
 import com.project.crm.domain.activity.ActivityLogRepository;
 import com.project.crm.domain.customer.dto.ConsultantCustomerDetailResponseDto;
 import lombok.RequiredArgsConstructor;
+import com.project.crm.domain.activity.dto.ActivityLogPageResponseDto;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +17,21 @@ public class ConsultantCustomerDetailService {
 
     private final CustomerRepository customerRepository;
     private final ActivityLogRepository activityLogRepository;
+
+    @Transactional(readOnly = true)
+    public ActivityLogPageResponseDto getHistory(Long customerId, Long counselorId, int page) {
+        if (page < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "페이지는 0 이상이어야 합니다.");
+        }
+        customerRepository.findByCustomerIdAndCounselor_UserId(customerId, counselorId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "담당 고객의 정보만 조회할 수 있습니다."
+                ));
+        var pageable = PageRequest.of(page, 5,
+                Sort.by(Sort.Direction.DESC, "createdAt", "activityId"));
+        return ActivityLogPageResponseDto.from(
+                activityLogRepository.findByCustomer_CustomerId(customerId, pageable));
+    }
 
     @Transactional(readOnly = true)
     public ConsultantCustomerDetailResponseDto getDetail(Long customerId, Long counselorId) {
@@ -54,3 +72,4 @@ public class ConsultantCustomerDetailService {
         );
     }
 }
+

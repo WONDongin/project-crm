@@ -3,6 +3,8 @@ package com.project.crm.api.consultant;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.project.crm.domain.activity.dto.ActivityLogPageResponseDto;
 
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,21 @@ public class ConsultantCustomerController {
     private final CustomerService customerService;
     private final ConsultantCustomerDetailService customerDetailService;
     private final UserRepository userRepository;
+
+    // 신청 접수 원본과 상담 이력을 최신순으로 5건씩 조회
+    @GetMapping("/{customerId}/activities")
+    public ApiResponse<ActivityLogPageResponseDto> getCustomerHistory(
+            @PathVariable Long customerId,
+            @RequestParam(defaultValue = "0") int page,
+            Authentication authentication
+    ) {
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "로그인 정보를 확인할 수 없습니다."
+                ));
+        return ApiResponse.success(customerDetailService.getHistory(customerId, user.getUserId(), page));
+    }
 
     // 담당 고객 상세 및 가장 최근 상담 신청 정보 조회
     @GetMapping("/{customerId}")
@@ -134,4 +151,5 @@ public class ConsultantCustomerController {
     }
 
 }
+
 
