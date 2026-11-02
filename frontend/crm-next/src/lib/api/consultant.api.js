@@ -1,6 +1,12 @@
 // 상담사 전용 API 호출모음 (getCustomerList(), getCustomerDetail(), createActivityLog())
 import api from "./axios";
 
+// 로그인한 상담사의 담당 고객 상세 조회
+export const getConsCustomerDetail = async (customerId, signal) => {
+  const response = await api.get(`/consultant/customers/${customerId}`, { signal });
+  return response.data;
+};
+
 // 상담사 대시보드_고객 목록 조회
 export const getConscustomers = async () => {
   try {
@@ -53,3 +59,4 @@ export const updateConsCustomer = async (customerId, updates) => {
     throw error;
   }
 };
+
