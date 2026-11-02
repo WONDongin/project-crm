@@ -1,0 +1,174 @@
+.backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 15, 15, 0.38);
+  animation: fadeIn 160ms ease-out;
+}
+
+.dialog {
+  position: relative;
+  width: min(100%, 420px);
+  padding: 58px 32px 28px;
+  border: 1px solid #ededed;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: riseIn 180ms ease-out;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #777;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: #f3f3f3;
+  color: #111;
+}
+
+.closeButton:focus-visible,
+.confirmButton:focus-visible {
+  outline: 3px solid #777;
+  outline-offset: 3px;
+}
+
+.closeButton svg {
+  width: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.7;
+}
+
+.iconWrap {
+  display: grid;
+  width: 112px;
+  height: 112px;
+  place-items: center;
+  margin: 0 auto 24px;
+  border: 1px solid #e7e7e7;
+  border-radius: 50%;
+  background: #f7f7f7;
+  color: #111;
+  box-shadow: 0 0 0 12px #fbfbfb;
+}
+
+.successIcon {
+  background: #111;
+  color: #fff;
+}
+
+.errorIcon {
+  background: #fff;
+  color: #111;
+}
+
+.iconWrap svg {
+  width: 48px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.title {
+  margin: 0;
+  color: #111;
+  font-size: 27px;
+  font-weight: 750;
+  letter-spacing: -0.06em;
+}
+
+.message {
+  margin: 10px 0 28px;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.confirmButton {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #111;
+  border-radius: 10px;
+  background: #111;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.confirmButton:hover {
+  background: #fff;
+  color: #111;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .backdrop {
+    padding: 18px;
+  }
+
+  .dialog {
+    padding: 54px 22px 22px;
+    border-radius: 20px;
+  }
+
+  .iconWrap {
+    width: 96px;
+    height: 96px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .dialog {
+    animation: none;
+  }
+}

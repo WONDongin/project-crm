@@ -101,7 +101,7 @@
   width: 100%;
 
   border-collapse: collapse;
-
+  text-align: center;
   margin-top: 20px;
 }
 
@@ -115,7 +115,7 @@
   font-size: 14px;
   font-weight: 700;
 
-  text-align: left;
+  text-align: center;
 
   color: #374151;
 }
@@ -197,6 +197,13 @@
   background: #d1d5db;
 
   cursor: not-allowed;
+}
+
+.tagEditor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
 }
 
 /* 상태 select */

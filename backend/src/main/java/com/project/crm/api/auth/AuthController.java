@@ -4,7 +4,6 @@ package com.project.crm.api.auth;
 import com.project.crm.domain.user.AuthService;
 import com.project.crm.domain.user.User;
 import com.project.crm.domain.user.UserRepository;
-import com.project.crm.domain.user.dto.CustomPrincipal;
 import com.project.crm.domain.user.dto.LoginRequest;
 import com.project.crm.domain.user.dto.LoginResponse;
 import jakarta.servlet.http.Cookie;
