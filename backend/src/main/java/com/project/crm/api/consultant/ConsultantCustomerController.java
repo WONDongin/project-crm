@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.project.crm.common.response.ApiResponse;
 import com.project.crm.domain.customer.CustomerService;
+import com.project.crm.domain.customer.ConsultantCustomerDetailService;
+import com.project.crm.domain.customer.dto.ConsultantCustomerDetailResponseDto;
 import com.project.crm.domain.customer.dto.ConsultantCustomerResponseDto;
 import com.project.crm.domain.customer.dto.UpdateConsultantCustomerRequestDto;
 import com.project.crm.domain.customer.dto.UpdateCustomerTagRequestDto;
@@ -29,7 +33,24 @@ import com.project.crm.domain.user.UserRepository;
 @RequiredArgsConstructor
 public class ConsultantCustomerController {
     private final CustomerService customerService;
+    private final ConsultantCustomerDetailService customerDetailService;
     private final UserRepository userRepository;
+
+    // 담당 고객 상세 및 가장 최근 상담 신청 정보 조회
+    @GetMapping("/{customerId}")
+    public ApiResponse<ConsultantCustomerDetailResponseDto> getCustomerDetail(
+            @PathVariable Long customerId,
+            Authentication authentication
+    ) {
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "로그인 정보를 확인할 수 없습니다."
+                ));
+
+        return ApiResponse.success(customerDetailService.getDetail(customerId, user.getUserId()));
+    }
 
     // 상담사별 고객 조회
     @GetMapping
@@ -113,3 +134,4 @@ public class ConsultantCustomerController {
     }
 
 }
+

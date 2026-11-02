@@ -15,6 +15,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     // 상담사별 고객 조회
     List<Customer> findByCounselor_UserId(Long counselorId);
 
+    // 상세 조회에서는 변경용 비관적 쓰기 잠금을 사용하지 않는다.
+    Optional<Customer> findByCustomerIdAndCounselor_UserId(Long customerId, Long counselorId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         select customer
@@ -33,3 +36,4 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
         LocalDate birthDate
     );
 }
+

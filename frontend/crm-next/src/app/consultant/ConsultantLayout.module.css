@@ -74,8 +74,21 @@
 /* 메인 컨텐츠 */
 .main {
   flex: 1;
+  min-width: 0;
   margin-left: 240px;
   padding: 40px;
+}
+
+/* 좁은 화면에서는 고객 상세 정보가 사이드바에 가리지 않도록 배치 */
+@media (max-width: 900px) {
+  .layout { flex-direction: column; }
+  .sidebar { position: static; width: 100%; height: auto; padding: 16px 20px; }
+  .logo { margin-bottom: 12px; }
+  .userBox { flex-direction: row; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; }
+  .menuTitle { margin-bottom: 8px; }
+  .menuList { display: flex; flex-wrap: wrap; gap: 8px; }
+  .menuItem { margin-bottom: 0; }
+  .main { margin-left: 0; padding: 20px; }
 }
 
 /* 공통 페이지 박스 */
@@ -135,6 +148,20 @@
 }
 
 /* 상태 뱃지 */
+.customerLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #111827;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.customerLink:focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 4px;
+}
+
 .badge {
   display: inline-flex;
 
@@ -410,3 +437,4 @@
 
   color: #111827;
 }
+
