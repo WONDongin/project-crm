@@ -34,10 +34,38 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ConsultantCustomerDetailControllerTest {
 
     @Autowired MockMvc mockMvc;
+    @MockitoBean com.project.crm.domain.activity.ConsultantActivityLogService activityLogService;
     @MockitoBean CustomerService customerService;
     @MockitoBean ConsultantCustomerDetailService detailService;
     @MockitoBean UserRepository userRepository;
     @MockitoBean JwtUtil jwtUtil;
+
+    @Test
+    void createsUsingLoginAndRejectsInvalidInputAndRoles() throws Exception {
+        var request = new com.project.crm.domain.activity.dto.CreateActivityLogRequestDto(
+                "PHONE", "COMPLETED", "상담 내용", "다음 주 연락");
+        given(activityLogService.create(10L, "owner@example.com", request)).willReturn(42L);
+        String body = """
+                {"consultType":"PHONE","activityResult":"COMPLETED","content":"상담 내용",
+                 "nextAction":"다음 주 연락","counselorId":999,"createdBy":"SYSTEM"}
+                """;
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/consultant/customers/10/activities")
+                .with(authentication(login("ROLE_CONSULTANT")))
+                .contentType("application/json").content(body))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.data").value(42));
+        verify(activityLogService).create(10L, "owner@example.com", request);
+        for (String invalid : List.of("{}", "{\"consultType\":\"PHONE\",\"activityResult\":\"COMPLETED\",\"content\":\"   \"}",
+                "{\"consultType\":\"PHONE\",\"activityResult\":\"COMPLETED\",\"content\":\"내용\",\"nextAction\":\"" + "x".repeat(256) + "\"}")) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/consultant/customers/10/activities")
+                    .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json").content(invalid))
+                    .andExpect(status().isBadRequest());
+        }
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/consultant/customers/10/activities")
+                .contentType("application/json").content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/consultant/customers/10/activities")
+                .with(authentication(login("ROLE_ADMIN"))).contentType("application/json").content(body))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
     void derivesCounselorFromLoginAndIgnoresForgedCounselorParameter() throws Exception {

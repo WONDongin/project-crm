@@ -155,7 +155,7 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
             )}
           </section>
           {state.status === "ready" && <CustomerHistory key={customerId} customerId={customerId}
-            onRestricted={handleHistoryRestricted} />}
+            onRestricted={handleHistoryRestricted} onCreated={() => setAttempt((value) => value + 1)} />}
         </div>
       )}
     </div>
