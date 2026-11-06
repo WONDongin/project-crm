@@ -210,14 +210,7 @@ export default function CustomersPage() {
           ) : (
             customers.map((customer) => (
               <tr key={customer.customerId}>
-                <td>
-                  <Link
-                    href={`/consultant/customers/${customer.customerId}`}
-                    className={styles.customerLink}
-                  >
-                    {customer.name}
-                  </Link>
-                </td>
+                <td>{customer.name}</td>
 
                 <td>{customer.phone}</td>
 
@@ -291,7 +284,13 @@ export default function CustomersPage() {
 
                 {/* 상담 기록 */}
                 <td>
-                  <button className={styles.detailButton}>상담 기록</button>
+                  <Link
+                    href={`/consultant/customers/${customer.customerId}`}
+                    className={`${styles.detailButton} ${styles.recordLink}`}
+                    aria-label={`${customer.name} 고객 상담 기록`}
+                  >
+                    상담 기록
+                  </Link>
                 </td>
 
                 {/* 저장 버튼 */}
