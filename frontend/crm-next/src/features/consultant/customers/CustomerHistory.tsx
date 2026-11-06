@@ -105,6 +105,11 @@ export default function CustomerHistory({ customerId, onRestricted, onCreated }:
                     </dl>
                     <h4 className={styles.contentTitle}>{receipt ? "신청 내용" : "상담 내용"}</h4>
                     <p className={styles.content}>{record.content || "입력된 내용이 없습니다."}</p>
+                    {record.updatedAt && <p className={styles.contentTitle}>수정일 {dateTime(record.updatedAt)}</p>}
+                    {record.editable && <CreateActivityForm key={`${record.activityId}-${attempt}`}
+                      customerId={customerId} record={record} onRestricted={onRestricted} onCreated={() => {
+                        setAttempt((value) => value + 1);
+                      }} />}
                     {record.nextAction && <><h4 className={styles.contentTitle}>다음 액션</h4>
                       <p className={styles.content}>{record.nextAction}</p></>}
                   </li>

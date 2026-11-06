@@ -40,6 +40,42 @@ class ConsultantCustomerDetailControllerTest {
     @MockitoBean UserRepository userRepository;
     @MockitoBean JwtUtil jwtUtil;
 
+
+    @Test
+    void updateUsesAuthenticatedAuthorAndValidatesInputAndRoles() throws Exception {
+        var request = new com.project.crm.domain.activity.dto.CreateActivityLogRequestDto(
+                "PHONE", "COMPLETED", "수정 내용", null);
+        String body = """
+                {"consultType":"PHONE","activityResult":"COMPLETED","content":"수정 내용",
+                 "counselorId":999,"createdBy":"SYSTEM"}
+                """;
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
+                .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json").content(body))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+        verify(activityLogService).update(10L, 42L, "owner@example.com", request);
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
+                .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json").content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
+                .contentType("application/json").content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
+                .with(authentication(login("ROLE_ADMIN"))).contentType("application/json").content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void propagatesUpdatePermissionDenial() throws Exception {
+        org.mockito.Mockito.doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN))
+                .when(activityLogService).update(org.mockito.ArgumentMatchers.eq(10L), org.mockito.ArgumentMatchers.eq(42L),
+                        org.mockito.ArgumentMatchers.eq("owner@example.com"), org.mockito.ArgumentMatchers.any());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
+                .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json")
+                .content("""
+                        {"consultType":"PHONE","activityResult":"COMPLETED","content":"수정 내용"}
+                        """))
+                .andExpect(status().isForbidden());
+    }
+
     @Test
     void createsUsingLoginAndRejectsInvalidInputAndRoles() throws Exception {
         var request = new com.project.crm.domain.activity.dto.CreateActivityLogRequestDto(
@@ -122,7 +158,7 @@ class ConsultantCustomerDetailControllerTest {
                 .willReturn(Optional.of(User.builder().userId(7L).build()));
         given(detailService.getHistory(10L, 7L, 1)).willReturn(new ActivityLogPageResponseDto(
                 List.of(new ActivityLogPageResponseDto.Entry(3L, "SYSTEM", null, null,
-                        "RECEIVED", "PM", "신청 내용", null, null)), 1, 5, 6, 2));
+                        "RECEIVED", "PM", "신청 내용", null, null, null, false)), 1, 5, 6, 2));
         mockMvc.perform(get("/consultant/customers/10/activities?page=1&size=100&counselorId=999&sort=activityId,asc")
                         .with(authentication(login("ROLE_CONSULTANT"))))
                 .andExpect(status().isOk())

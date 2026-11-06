@@ -85,6 +85,76 @@ class ConsultantActivityLogIntegrationTest {
         denied(customer.getCustomerId(), owner.getEmail(), 403);
         assertThat(logs.count()).isZero();
     }
+
+    @Test void updatesOwnRecordAndPreservesAuthorCreationDateAndLastActivity() {
+        Long id = service.create(customer.getCustomerId(), owner.getEmail(), request);
+        em.flush(); em.clear();
+        var before = em.find(ActivityLog.class, id);
+        var createdAt = before.getCreatedAt();
+        var lastActivityAt = em.find(Customer.class, customer.getCustomerId()).getLastActivityAt();
+        service.update(customer.getCustomerId(), id, owner.getEmail(),
+                new CreateActivityLogRequestDto("PHONE", "COMPLETED", " 수정 내용 ", null));
+        em.flush(); em.clear();
+        var updated = em.find(ActivityLog.class, id);
+        assertThat(updated.getContent()).isEqualTo("수정 내용");
+        assertThat(updated.getNextAction()).isNull();
+        assertThat(updated.getConsultType()).isEqualTo("PHONE");
+        assertThat(updated.getActivityResult()).isEqualTo("COMPLETED");
+        assertThat(updated.getUpdatedAt()).isNotNull();
+        assertThat(updated.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(updated.getCounselor().getUserId()).isEqualTo(owner.getUserId());
+        assertThat(updated.getCreatedBy()).isEqualTo("CONSULTANT");
+        assertThat(em.find(Customer.class, customer.getCustomerId()).getLastActivityAt()).isEqualTo(lastActivityAt);
+    }
+
+    @Test void rejectsSystemOriginalEvenWhenAssignedToCurrentCounselor() {
+        var receipt = em.persistAndFlush(ActivityLog.builder().customer(customer).counselor(owner)
+                .createdBy("SYSTEM").activityResult("RECEIVED").content("신청 원본").build());
+        updateDenied(customer.getCustomerId(), receipt.getActivityId(), owner.getEmail(), 403);
+        assertThat(receipt.getContent()).isEqualTo("신청 원본");
+    }
+
+    @Test void reassignmentBlocksOldOwnerAndNewOwnerCannotEditPreviousAuthorsRecord() {
+        Long id = service.create(customer.getCustomerId(), owner.getEmail(), request);
+        customer.setCounselor(other); em.flush(); em.clear();
+        updateDenied(customer.getCustomerId(), id, owner.getEmail(), 403);
+        updateDenied(customer.getCustomerId(), id, other.getEmail(), 403);
+        assertThat(em.find(ActivityLog.class, id).getContent()).isEqualTo("상담 내용");
+    }
+
+    @Test void rejectsMismatchedCustomerAndMissingRecord() {
+        Long id = service.create(customer.getCustomerId(), owner.getEmail(), request);
+        var another = em.persistAndFlush(Customer.builder().name("다른 고객").phone("010-9999-9999")
+                .interestCourse("JAVA").leadSource("WEB").status("IN_PROGRESS").counselor(owner).build());
+        updateDenied(another.getCustomerId(), id, owner.getEmail(), 404);
+        updateDenied(customer.getCustomerId(), Long.MAX_VALUE, owner.getEmail(), 404);
+        customer.setCounselor(null); em.flush(); em.clear();
+        updateDenied(customer.getCustomerId(), id, owner.getEmail(), 403);
+    }
+
+    @Test void rejectsInactiveAuthorAndInvalidCodesBeforeMutatingRecord() {
+        Long id = service.create(customer.getCustomerId(), owner.getEmail(), request);
+        updateDenied(customer.getCustomerId(), id, "missing@example.com", 401);
+        owner.setStatus("INACTIVE"); em.flush();
+        updateDenied(customer.getCustomerId(), id, owner.getEmail(), 403);
+        owner.setStatus("ACTIVE"); owner.setRoles("ROLE_ADMIN"); em.flush();
+        updateDenied(customer.getCustomerId(), id, owner.getEmail(), 403);
+        owner.setRoles("ROLE_CONSULTANT"); em.flush();
+        for (var invalid : java.util.List.of(
+                new CreateActivityLogRequestDto("PHONE", "RECEIVED", "변경", null),
+                new CreateActivityLogRequestDto("INACTIVE", "COMPLETED", "변경", null),
+                new CreateActivityLogRequestDto("UNKNOWN", "COMPLETED", "변경", null))) {
+            assertThatThrownBy(() -> service.update(customer.getCustomerId(), id, owner.getEmail(), invalid))
+                    .isInstanceOfSatisfying(ResponseStatusException.class, e -> assertThat(e.getStatusCode().value()).isEqualTo(400));
+        }
+        assertThat(em.find(ActivityLog.class, id).getContent()).isEqualTo("상담 내용");
+    }
+
+    private void updateDenied(Long customerId, Long activityId, String email, int status) {
+        assertThatThrownBy(() -> service.update(customerId, activityId, email, request))
+                .isInstanceOfSatisfying(ResponseStatusException.class, e -> assertThat(e.getStatusCode().value()).isEqualTo(status));
+    }
+
     private void denied(Long id, String email, int status) {
         assertThatThrownBy(() -> service.create(id, email, request)).isInstanceOfSatisfying(
                 ResponseStatusException.class, e -> assertThat(e.getStatusCode().value()).isEqualTo(status));
