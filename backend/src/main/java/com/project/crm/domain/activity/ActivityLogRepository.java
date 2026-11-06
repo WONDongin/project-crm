@@ -19,6 +19,8 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> 
             Pageable pageable
     );
 
+    Optional<ActivityLog> findByActivityIdAndCustomer_CustomerId(Long activityId, Long customerId);
+
     // 일반 상담 기록을 제외하고 가장 최근 신청 접수 원본 한 건만 조회
     Optional<ActivityLog> findFirstByCustomer_CustomerIdAndCreatedByAndActivityResultOrderByCreatedAtDescActivityIdDesc(
             Long customerId,

@@ -72,3 +72,8 @@ export const createConsCustomerActivity = async (customerId, record) => {
   const response = await api.post(`/consultant/customers/${customerId}/activities`, record);
   return response.data;
 };
+
+export const updateConsCustomerActivity = async (customerId, activityId, record) => {
+  const response = await api.patch(`/consultant/customers/${customerId}/activities/${activityId}`, record);
+  return response.data;
+};

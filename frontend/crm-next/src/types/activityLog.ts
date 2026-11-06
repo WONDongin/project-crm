@@ -8,6 +8,8 @@ export interface ActivityLogEntry {
   content: string | null;
   nextAction: string | null;
   createdAt: string | null;
+  updatedAt: string | null;
+  editable: boolean;
 }
 
 export interface ActivityLogPage {

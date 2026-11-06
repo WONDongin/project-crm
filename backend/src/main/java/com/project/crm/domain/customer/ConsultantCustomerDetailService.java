@@ -30,7 +30,7 @@ public class ConsultantCustomerDetailService {
         var pageable = PageRequest.of(page, 5,
                 Sort.by(Sort.Direction.DESC, "createdAt", "activityId"));
         return ActivityLogPageResponseDto.from(
-                activityLogRepository.findByCustomer_CustomerId(customerId, pageable));
+                activityLogRepository.findByCustomer_CustomerId(customerId, pageable), counselorId);
     }
 
     @Transactional(readOnly = true)

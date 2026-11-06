@@ -54,6 +54,17 @@ public class ConsultantCustomerController {
                 "상담 기록이 등록되었습니다.");
     }
 
+    @PatchMapping("/{customerId}/activities/{activityId}")
+    public ApiResponse<Void> updateActivity(
+            @PathVariable Long customerId,
+            @PathVariable Long activityId,
+            @Valid @RequestBody CreateActivityLogRequestDto request,
+            Authentication authentication
+    ) {
+        activityLogService.update(customerId, activityId, authentication.getName(), request);
+        return ApiResponse.success(null, "상담 기록이 수정되었습니다.");
+    }
+
     // 신청 접수 원본과 상담 이력을 최신순으로 5건씩 조회
     @GetMapping("/{customerId}/activities")
     public ApiResponse<ActivityLogPageResponseDto> getCustomerHistory(

@@ -204,6 +204,25 @@ class ConsultantCustomerDetailIntegrationTest {
         assertHistoryForbidden(customer.getCustomerId(), other.getUserId());
     }
 
+
+    @Test
+    void historyEditableRequiresCurrentAuthorsConsultantRecord() {
+        var mine = log(customer, "CONSULTANT", "COMPLETED", "내 기록", null);
+        mine.setCounselor(owner);
+        var previous = log(customer, "CONSULTANT", "COMPLETED", "이전 담당자 기록", null);
+        previous.setCounselor(other);
+        var receipt = log(customer, "SYSTEM", "RECEIVED", "신청 원본", null);
+        receipt.setCounselor(owner);
+        emFlushAndClear();
+        var entries = detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 0).content();
+        assertThat(entries).filteredOn(e -> e.activityId().equals(mine.getActivityId()))
+                .allMatch(e -> e.editable());
+        assertThat(entries).filteredOn(e -> !e.activityId().equals(mine.getActivityId()))
+                .noneMatch(e -> e.editable());
+    }
+
+    private void emFlushAndClear() { entityManager.flush(); entityManager.clear(); }
+
     private void assertHistoryForbidden(Long customerId, Long counselorId) {
         assertThatThrownBy(() -> detailService.getHistory(customerId, counselorId, 0))
                 .isInstanceOfSatisfying(ResponseStatusException.class,
