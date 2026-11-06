@@ -1,5 +1,7 @@
 package com.project.crm.domain.customer;
 
+import com.project.crm.domain.activity.ActivityLog;
+import com.project.crm.domain.activity.ActivityLogRepository;
 import com.project.crm.domain.user.User;
 import com.project.crm.domain.user.UserRepository;
 import com.project.crm.domain.user.dto.UserResponseDto;
@@ -19,6 +21,7 @@ public class AdminCustomerAssignmentService {
 
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
+    private final ActivityLogRepository activityLogRepository;
 
     // 배정 가능한 활성 상담사 목록 조회
     public List<UserResponseDto> getCounselors() {
@@ -64,6 +67,18 @@ public class AdminCustomerAssignmentService {
         }
 
         customer.setCounselor(counselor);
+
+        // 담당 상담사가 없는 신청 접수 기록에 배정한 상담사 연결
+        List<ActivityLog> unassignedLogs = activityLogRepository
+                .findByCustomer_CustomerIdAndCreatedByAndActivityResultAndCounselorIsNull(
+                        customerId,
+                        "SYSTEM",
+                        "RECEIVED"
+                );
+
+        for (ActivityLog activityLog : unassignedLogs) {
+            activityLog.setCounselor(counselor);
+        }
 
         // 기존 고객의 상태는 유지하고 신규 고객만 진행 중으로 변경
         if ("NEW".equals(customer.getStatus())) {
