@@ -21,6 +21,7 @@ export default function ConsultApplyPage() {
     phone: "",
     email: "",
     interestCourse: "",
+    consultType: "",
     preferredTime: "",
     content: "",
     leadSource: "",
@@ -66,6 +67,10 @@ export default function ConsultApplyPage() {
 
     if (!form.interestCourse) {
       return "관심 과정을 선택하세요.";
+    }
+
+    if (!form.consultType) {
+      return "상담 유형을 선택하세요.";
     }
 
     if (!form.preferredTime) {
@@ -187,6 +192,26 @@ export default function ConsultApplyPage() {
               {codes.INTEREST_COURSE?.map((course: CommonCode) => (
                 <option key={course.code} value={course.code}>
                   {course.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="consultType">상담 유형 *</label>
+
+            <select
+              id="consultType"
+              name="consultType"
+              value={form.consultType}
+              onChange={handleChange}
+              className={styles.select}
+              aria-required="true"
+            >
+              <option value="">상담 유형을 선택하세요.</option>
+
+              {codes.CONSULT_TYPE?.map((type: CommonCode) => (
+                <option key={type.code} value={type.code}>
+                  {type.name}
                 </option>
               ))}
             </select>

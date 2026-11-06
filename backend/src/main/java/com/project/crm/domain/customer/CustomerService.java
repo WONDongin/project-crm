@@ -67,6 +67,7 @@ public class CustomerService {
                                 .interestCourse(customer.getInterestCourse())
                                 .status(customer.getStatus())
                                 .customerTag(customer.getCustomerTag())
+
                                 .counselorId(
                                         customer.getCounselor() != null
                                                 ? customer.getCounselor().getUserId()
@@ -80,11 +81,8 @@ public class CustomerService {
                                 )
 
                                 .lastActivityAt(customer.getLastActivityAt())
-
                                 .leadSource(customer.getLeadSource())
-
                                 .build())
-
                         .toList();
         }
 
@@ -161,7 +159,8 @@ public class CustomerService {
                         );
                 }
 
-                if (status != null && !codeRepository.existsByCodeGroupAndCodeValAndUseYn(
+                if (status != null
+                        && !codeRepository.existsByCodeGroupAndCodeValAndUseYn(
                         "CUSTOMER_STATUS",
                         status,
                         "Y"
@@ -174,10 +173,10 @@ public class CustomerService {
 
                 if (customerTag != null && !customerTag.isBlank()
                         && !codeRepository.existsByCodeGroupAndCodeValAndUseYn(
-                                "CUSTOMER_TAG",
-                                customerTag,
-                                "Y"
-                        )) {
+                        "CUSTOMER_TAG",
+                        customerTag,
+                        "Y"
+                )) {
                         throw new ResponseStatusException(
                                 HttpStatus.BAD_REQUEST,
                                 "유효하지 않은 고객 태그입니다."
@@ -194,6 +193,7 @@ public class CustomerService {
                 if (status != null) {
                         customer.setStatus(status);
                 }
+
                 if (customerTag != null) {
                         customer.setCustomerTag(customerTag.isBlank() ? null : customerTag);
                 }
@@ -203,8 +203,19 @@ public class CustomerService {
         @Transactional
         public void applyConsult(ConsultApplyRequestDto request) {
 
-        Customer customer =
-                customerRepository
+                // 활성 상태인 상담 유형인지 검증
+                if (!codeRepository.existsByCodeGroupAndCodeValAndUseYn(
+                        "CONSULT_TYPE",
+                        request.getConsultType(),
+                        "Y"
+                )) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "유효하지 않은 상담 유형입니다."
+                        );
+                }
+
+                Customer customer = customerRepository
                         .findByPhoneAndBirthDate(
                                 request.getPhone(),
                                 request.getBirthDate()
@@ -224,10 +235,11 @@ public class CustomerService {
                                 return customerRepository.save(newCustomer);
                         });
 
-        activityLogService.createReceivedLog(
-                customer,
-                request.getPreferredTime(),
-                request.getContent()
-        );
-}
+                activityLogService.createReceivedLog(
+                        customer,
+                        request.getConsultType(),
+                        request.getPreferredTime(),
+                        request.getContent()
+                );
+        }
 }
