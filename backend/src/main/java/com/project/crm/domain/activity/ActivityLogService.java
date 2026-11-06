@@ -17,13 +17,16 @@ public class ActivityLogService {
     // 상담 신청시  ACTIVITY_LOG 자동 생성
     public void createReceivedLog(
             Customer customer,
+            String consultType,
             String preferredTime,
             String content
     ) {
 
         ActivityLog activityLog = ActivityLog.builder()
                 .customer(customer)
+                .counselor(customer.getCounselor())
                 .createdBy("SYSTEM")
+                .consultType(consultType)
                 .activityResult("RECEIVED")
                 .preferredTime(preferredTime)
                 .content(content)
