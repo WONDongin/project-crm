@@ -6,6 +6,7 @@ import { getConsCustomerHistory } from "@/lib/api/consultant.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
 import type { ActivityLogPage } from "@/types/activityLog";
+import CreateActivityForm from "./CreateActivityForm";
 import styles from "./CustomerDetail.module.css";
 
 type HistoryState =
@@ -16,9 +17,10 @@ type HistoryState =
 const dateTime = (value: string | null) =>
   value ? value.slice(0, 16).replace("T", " ") : "-";
 
-export default function CustomerHistory({ customerId, onRestricted }: {
+export default function CustomerHistory({ customerId, onRestricted, onCreated }: {
   customerId: string;
   onRestricted: () => void;
+  onCreated: () => void;
 }) {
   const [page, setPage] = useState(0);
   const [attempt, setAttempt] = useState(0);
@@ -61,6 +63,9 @@ export default function CustomerHistory({ customerId, onRestricted }: {
         <h2 id="consultation-history">상담 기록</h2>
         <span>{data ? `전체 ${data.totalElements}건 · 최신순` : "최신순 · 5건씩 조회"}</span>
       </div>
+      <CreateActivityForm customerId={customerId} onRestricted={onRestricted} onCreated={() => {
+        setPage(0); setAttempt((value) => value + 1); onCreated();
+      }} />
       {state.status === "loading" ? (
         <div role="status" className={styles.applicationLoading}>
           <span>상담 기록을 불러오는 중입니다.</span>

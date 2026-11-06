@@ -67,3 +67,8 @@ export const getConsCustomerHistory = async (customerId, page = 0, signal) => {
   });
   return response.data;
 };
+
+export const createConsCustomerActivity = async (customerId, record) => {
+  const response = await api.post(`/consultant/customers/${customerId}/activities`, record);
+  return response.data;
+};

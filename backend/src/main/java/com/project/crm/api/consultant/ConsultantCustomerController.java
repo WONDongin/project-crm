@@ -1,6 +1,10 @@
 package com.project.crm.api.consultant;
 
 import lombok.RequiredArgsConstructor;
+import com.project.crm.domain.activity.ConsultantActivityLogService;
+import com.project.crm.domain.activity.dto.CreateActivityLogRequestDto;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,9 +38,21 @@ import com.project.crm.domain.user.UserRepository;
 @RequestMapping("/consultant/customers")
 @RequiredArgsConstructor
 public class ConsultantCustomerController {
+    private final ConsultantActivityLogService activityLogService;
     private final CustomerService customerService;
     private final ConsultantCustomerDetailService customerDetailService;
     private final UserRepository userRepository;
+
+    @PostMapping("/{customerId}/activities")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<Long> createActivity(
+            @PathVariable Long customerId,
+            @Valid @RequestBody CreateActivityLogRequestDto request,
+            Authentication authentication
+    ) {
+        return ApiResponse.success(activityLogService.create(customerId, authentication.getName(), request),
+                "상담 기록이 등록되었습니다.");
+    }
 
     // 신청 접수 원본과 상담 이력을 최신순으로 5건씩 조회
     @GetMapping("/{customerId}/activities")

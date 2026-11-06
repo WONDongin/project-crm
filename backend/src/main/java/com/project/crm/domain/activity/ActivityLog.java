@@ -60,8 +60,13 @@ public class ActivityLog {
     @Column(name = "file_upload_no")
     private Long fileUploadNo;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    void initializeCreatedAt() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
 
     @Column(name = "updated_at", insertable = false)
     private LocalDateTime updatedAt;
