@@ -6,6 +6,7 @@ import { getConsCustomerHistory } from "@/lib/api/consultant.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
 import type { ActivityLogPage } from "@/types/activityLog";
+import ActivityAttachments from "./ActivityAttachments";
 import CreateActivityForm from "./CreateActivityForm";
 import styles from "./CustomerDetail.module.css";
 
@@ -112,6 +113,8 @@ export default function CustomerHistory({ customerId, onRestricted, onCreated }:
                       }} />}
                     {record.nextAction && <><h4 className={styles.contentTitle}>다음 액션</h4>
                       <p className={styles.content}>{record.nextAction}</p></>}
+                    <ActivityAttachments customerId={customerId} activityId={record.activityId}
+                      editable={record.editable} onRestricted={onRestricted} />
                   </li>
                 );
               })}

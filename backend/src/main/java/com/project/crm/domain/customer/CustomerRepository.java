@@ -30,6 +30,15 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
         @Param("counselorId") Long counselorId
     );
 
+    @Query("""
+        select c from Customer c
+        where replace(replace(replace(replace(replace(replace(c.phone, '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), '+', '') = :phone
+          and (c.birthDate = :birthDate or (c.birthDate is null and :birthDate is null))
+          and c.customerId <> :excludedId
+        """)
+    List<Customer> findIdentityMatches(@Param("phone") String phone,
+            @Param("birthDate") LocalDate birthDate, @Param("excludedId") Long excludedId);
+
     // 상담신청_기존 고객 여부 판단
     Optional<Customer> findByPhoneAndBirthDate(
         String phone,

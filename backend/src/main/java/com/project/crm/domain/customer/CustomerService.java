@@ -215,16 +215,16 @@ public class CustomerService {
                         );
                 }
 
-                Customer customer = customerRepository
-                        .findByPhoneAndBirthDate(
-                                request.getPhone(),
-                                request.getBirthDate()
-                        )
-                        .orElseGet(() -> {
+                String phone = CustomerProfileService.normalizePhone(request.getPhone());
+                var matches = customerRepository.findIdentityMatches(phone, request.getBirthDate(), -1L);
+                if (matches.size() > 1) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "중복 고객 정보 확인이 필요합니다.");
+                }
+                Customer customer = matches.stream().findFirst().orElseGet(() -> {
 
                                 Customer newCustomer = Customer.builder()
                                         .name(request.getName())
-                                        .phone(request.getPhone())
+                                        .phone(phone)
                                         .birthDate(request.getBirthDate())
                                         .email(request.getEmail())
                                         .interestCourse(request.getInterestCourse())
