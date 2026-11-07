@@ -1,152 +1,36 @@
-/* LoginPage.module.css */
-
-.loginPage {
-  min-height: 100vh;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  background: #f5f6fa;
-
-  padding: 20px;
-}
-
-.loginCard {
-  width: 100%;
-  max-width: 420px;
-
-  background: white;
-
-  border-radius: 24px;
-
-  padding: 42px;
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-}
-
-.logoBox {
-  text-align: center;
-
-  margin-bottom: 36px;
-}
-
-.logo {
-  width: 72px;
-  height: 72px;
-
-  margin: 0 auto 20px;
-
-  border-radius: 20px;
-
-  background: #111827;
-
-  color: white;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.title {
-  font-size: 32px;
-  font-weight: 700;
-
-  color: #111827;
-
-  margin-bottom: 10px;
-}
-
-.desc {
-  font-size: 15px;
-
-  color: #6b7280;
-}
-
-.form {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 20px;
-}
-
-.inputGroup {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 10px;
-}
-
-.inputGroup label {
-  font-size: 14px;
-  font-weight: 600;
-
-  color: #374151;
-}
-
-.input {
-  height: 52px;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  color: #999;
-  padding: 0 16px;
-
-  font-size: 15px;
-
-  outline: none;
-
-  transition: all 0.2s ease;
-}
-
-.input:focus {
-  border-color: #111827;
-
-  box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
-}
-
-.loginButton {
-  height: 54px;
-
-  border: none;
-
-  border-radius: 14px;
-
-  background: #111827;
-
-  color: white;
-
-  font-size: 16px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-
-  margin-top: 10px;
-}
-
-.loginButton:hover {
-  background: #1f2937;
-}
-
-.errorBox {
-  background: #fef2f2;
-
-  color: #dc2626;
-
-  border: 1px solid #fecaca;
-
-  padding: 14px;
-
-  border-radius: 12px;
-
-  font-size: 14px;
-}
+.loginPage { min-height: 100dvh; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); background: white; }
+.intro { background: #edf4ff; padding: 48px 64px; display: flex; flex-direction: column; }
+.brand { color: var(--crm-ink); font-size: 28px; font-weight: 800; letter-spacing: -1px; text-decoration: none; align-self: flex-start; }
+.brand span { color: var(--crm-blue); margin-left: 3px; }
+.introContent { margin: auto 0; padding: 64px 0; max-width: 480px; }
+.introContent h2 { font-size: 36px; line-height: 1.3; letter-spacing: -.04em; font-weight: 750; margin: 0 0 20px; }
+.introContent > p { font-size: 18px; line-height: 1.7; color: var(--crm-muted); margin: 0; }
+.workflow { margin-top: 44px; display: grid; gap: 24px; }
+.workflow div { display: flex; align-items: center; gap: 20px; }
+.workflow strong { color: var(--crm-action); font-size: 15px; font-weight: 650; min-width: 60px; }
+.workflow span { color: var(--crm-muted); font-size: 15px; }
+.introFooter { font-size: 13px; color: var(--crm-muted); margin: 0; }
+.formSide { display: flex; align-items: center; justify-content: center; padding: 64px 40px; }
+.loginCard { width: 100%; max-width: 400px; }
+.title { font-size: 32px; line-height: 1.3; font-weight: 750; letter-spacing: -.035em; margin: 0 0 12px; }
+.desc { color: var(--crm-muted); margin: 0 0 36px; font-size: 16px; }
+.form { display: grid; gap: 24px; }
+.inputGroup { display: grid; gap: 10px; }
+.inputGroup label { font-weight: 600; font-size: 14px; }
+.input { width: 100%; min-height: 54px; border: 1px solid #c7cdd4; background: white; border-radius: 10px; padding: 14px 16px; color: var(--crm-ink); }
+.input::placeholder { color: #697586; }
+.input:focus { border-color: var(--crm-blue); }
+.passwordField { position: relative; }
+.passwordField .input { padding-right: 80px; }
+.reveal { position: absolute; top: 5px; bottom: 5px; right: 8px; min-width: 56px; border: 0; border-radius: 6px; background: transparent; color: var(--crm-muted); font-size: 13px; cursor: pointer; }
+.reveal:hover { background: #f2f4f6; }
+.loginButton { min-height: 54px; border: 0; border-radius: 10px; color: white; background: var(--crm-action); font-weight: 650; cursor: pointer; transition: background .15s; }
+.loginButton:hover:not(:disabled) { background: #1454bc; }
+.loginButton:disabled { opacity: .65; cursor: wait; }
+.errorBox { padding: 12px 16px; color: #b42318; background: #fff0ed; border-radius: 8px; font-size: 14px; margin: 0; }
+.help { margin: 28px 0 24px; color: var(--crm-muted); font-size: 13px; line-height: 1.7; }
+.applyLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--crm-action); font-size: 14px; text-decoration: none; }
+.applyLink:hover { text-decoration: underline; }
+@media (max-width: 1100px) { .intro { padding: 40px; } .introContent h2 { font-size: 32px; } .workflow div { flex-direction: column; align-items: flex-start; gap: 4px; } }
+@media (max-width: 700px) { .loginPage { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .intro { padding: 24px; background: white; } .brand { font-size: 26px; } .introContent, .introFooter { display: none; } .formSide { align-items: flex-start; padding: 32px 24px 48px; } .title { font-size: 28px; } .desc { font-size: 15px; margin-bottom: 32px; } }
+@media (prefers-reduced-motion: reduce) { .loginButton { transition: none; } }
