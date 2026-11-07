@@ -2,9 +2,9 @@
 import api from "./axios";
 
 // 관리자 대시보드_사용자 관리
-export const getUsers = async () => {
+export const getUsers = async (signal) => {
   try {
-    const response = await api.get("/admin/users");
+    const response = await api.get("/admin/users", { signal });
 
     return response.data;
   } catch (error) {
@@ -41,3 +41,7 @@ export const assignCustomerCounselor = async (customerId, counselorId) => {
 
   return response.data;
 };
+export const createAdminUser = async (draft) => (await api.post('/admin/users', draft)).data;
+export const updateAdminUser = async (id, draft) => (await api.patch(`/admin/users/${id}`, draft)).data;
+export const resetAdminUserPassword = async (id, password) => (await api.post(`/admin/users/${id}/password`, { password })).data;
+export const unassignCustomerCounselor = async (id) => (await api.delete(`/admin/customers/${id}/counselor`)).data;

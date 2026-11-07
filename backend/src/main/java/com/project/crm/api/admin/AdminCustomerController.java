@@ -1,6 +1,8 @@
 package com.project.crm.api.admin;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import jakarta.validation.Valid;
 
@@ -45,16 +47,22 @@ public class AdminCustomerController {
     @PatchMapping("/{customerId}/counselor")
     public ApiResponse<Void> assignCounselor(
             @PathVariable Long customerId,
-            @Valid @RequestBody AssignCounselorRequestDto request
+            @Valid @RequestBody AssignCounselorRequestDto request, Authentication authentication
     ) {
         assignmentService.assignCounselor(
                 customerId,
-                request.getCounselorId()
+                request.getCounselorId(), authentication.getName()
         );
 
         return ApiResponse.success(
                 null,
                 "담당 상담사가 저장되었습니다."
         );
+    }
+
+    @DeleteMapping("/{customerId}/counselor")
+    public ApiResponse<Void> unassignCounselor(@PathVariable Long customerId, Authentication authentication) {
+        assignmentService.unassignCounselor(customerId, authentication.getName());
+        return ApiResponse.success(null, "담당자 배정이 해제되었습니다.");
     }
 }

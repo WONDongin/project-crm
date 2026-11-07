@@ -1,25 +1,29 @@
 package com.project.crm.api.admin;
-// /api/admin/users/** 엔드포인트 (사용자 관리 기능 라우팅)
 
 import com.project.crm.common.response.ApiResponse;
-import com.project.crm.domain.user.UserService;
-import com.project.crm.domain.user.dto.UserResponseDto;
+import com.project.crm.domain.user.AdminUserService;
+import com.project.crm.domain.user.dto.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin/users")
-@RequiredArgsConstructor
+@RestController @RequestMapping("/admin/users") @RequiredArgsConstructor
 public class AdminUserController {
-    private  final UserService userService;
-
-    @GetMapping
-    public ApiResponse<List<UserResponseDto>> getUsers() {
-
-        return ApiResponse.success(userService.getUsers());
+    private final AdminUserService users;
+    @GetMapping public ApiResponse<List<UserResponseDto>> list() { return ApiResponse.success(users.list()); }
+    @PostMapping @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<UserResponseDto> create(@Valid @RequestBody AdminUserRequestDto.Create request,Authentication auth) {
+        return ApiResponse.success(users.create(auth.getName(),request),"계정이 생성되었습니다.");
+    }
+    @PatchMapping("/{id}")
+    public ApiResponse<AdminUserRequestDto.Change> update(@PathVariable Long id,@Valid @RequestBody AdminUserRequestDto.Update request,Authentication auth) {
+        return ApiResponse.success(users.update(id,auth.getName(),request),"계정 정보가 수정되었습니다.");
+    }
+    @PostMapping("/{id}/password")
+    public ApiResponse<AdminUserRequestDto.Change> password(@PathVariable Long id,@Valid @RequestBody AdminUserRequestDto.Password request,Authentication auth) {
+        return ApiResponse.success(users.resetPassword(id,auth.getName(),request.password()),"비밀번호가 초기화되었습니다.");
     }
 }

@@ -29,7 +29,7 @@ public class FileService {
     private record Access(User user, ActivityLog activity) {}
 
     private Access access(Long customerId, Long activityId, String email, boolean writing) {
-        User user = users.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        User user = users.findByEmailForWork(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         if (!"ROLE_CONSULTANT".equals(user.getRoles()) || !"ACTIVE".equals(user.getStatus())) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         // 고객 행 잠금으로 담당자 재배정 및 동시 첨부 개수 검사를 직렬화한다.
         customers.findAccessibleForConsultant(customerId, user.getUserId())

@@ -57,7 +57,7 @@ class ConsultantCustomerDetailControllerTest {
                 .andExpect(status().isBadRequest());
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/profile")
                 .contentType("application/json").content("{}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -76,7 +76,7 @@ class ConsultantCustomerDetailControllerTest {
                 .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json").content("{}"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
-                .contentType("application/json").content(body)).andExpect(status().isForbidden());
+                .contentType("application/json").content(body)).andExpect(status().isUnauthorized());
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/activities/42")
                 .with(authentication(login("ROLE_ADMIN"))).contentType("application/json").content(body))
                 .andExpect(status().isForbidden());
@@ -116,7 +116,7 @@ class ConsultantCustomerDetailControllerTest {
                     .andExpect(status().isBadRequest());
         }
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/consultant/customers/10/activities")
-                .contentType("application/json").content(body)).andExpect(status().isForbidden());
+                .contentType("application/json").content(body)).andExpect(status().isUnauthorized());
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/consultant/customers/10/activities")
                 .with(authentication(login("ROLE_ADMIN"))).contentType("application/json").content(body))
                 .andExpect(status().isForbidden());
@@ -144,7 +144,7 @@ class ConsultantCustomerDetailControllerTest {
 
     @Test
     void blocksAnonymousAndAdminBeforeReadingCustomerData() throws Exception {
-        mockMvc.perform(get("/consultant/customers/10")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/consultant/customers/10")).andExpect(status().isUnauthorized());
         mockMvc.perform(get("/consultant/customers/10")
                         .with(authentication(login("ROLE_ADMIN"))))
                 .andExpect(status().isForbidden());
@@ -211,7 +211,7 @@ class ConsultantCustomerDetailControllerTest {
 
     @Test
     void historyBlocksAnonymousAdminMissingUserAndWrongOwner() throws Exception {
-        mockMvc.perform(get("/consultant/customers/10/activities")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/consultant/customers/10/activities")).andExpect(status().isUnauthorized());
         mockMvc.perform(get("/consultant/customers/10/activities")
                         .with(authentication(login("ROLE_ADMIN")))).andExpect(status().isForbidden());
         verifyNoInteractions(detailService, userRepository);

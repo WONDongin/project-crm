@@ -12,6 +12,14 @@ import org.springframework.data.repository.query.Param;
 
 // 고객 리포지토리 (데이터베이스 접근)
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    interface AssignmentCount { Long getUserId(); long getCustomerCount(); }
+    @Query("select c.counselor.userId as userId, count(c) as customerCount from Customer c where c.counselor is not null group by c.counselor.userId")
+    List<AssignmentCount> countAssignments();
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Customer c where c.counselor.userId = :userId order by c.customerId")
+    List<Customer> findAssignedForUpdate(@Param("userId") Long userId);
+
     // 상담사별 고객 조회
     List<Customer> findByCounselor_UserId(Long counselorId);
 

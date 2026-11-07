@@ -25,6 +25,7 @@ public class CustomerService {
         private final CustomerRepository customerRepository;
         private final ActivityLogService activityLogService;
         private final CodeRepository codeRepository;
+        private final com.project.crm.domain.user.UserRepository userRepository;
 
         // 전체 고객 조회
         public List<CustomerResponseDto> getCustomers() {
@@ -93,6 +94,7 @@ public class CustomerService {
                 Long counselorId,
                 String status
         ) {
+                verifyConsultant(counselorId);
                 if (!codeRepository.existsByCodeGroupAndCodeValAndUseYn(
                         "CUSTOMER_STATUS",
                         status,
@@ -121,6 +123,7 @@ public class CustomerService {
                 Long counselorId,
                 String customerTag
         ) {
+                verifyConsultant(counselorId);
                 if (!codeRepository.existsByCodeGroupAndCodeValAndUseYn(
                         "CUSTOMER_TAG",
                         customerTag,
@@ -149,6 +152,7 @@ public class CustomerService {
                 Long counselorId,
                 UpdateConsultantCustomerRequestDto request
         ) {
+                verifyConsultant(counselorId);
                 String status = request.getStatus();
                 String customerTag = request.getCustomerTag();
 
@@ -244,6 +248,12 @@ public class CustomerService {
                         request.getPreferredTime(),
                         request.getContent()
                 );
+        }
+        private void verifyConsultant(Long id) {
+                var user = userRepository.findByIdForWork(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "상담사 정보를 확인할 수 없습니다."));
+                if (!"ROLE_CONSULTANT".equals(user.getRoles()) || !"ACTIVE".equals(user.getStatus()))
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "활성 상담사만 변경할 수 있습니다.");
         }
         private void validateApplicationCode(String group, String value) {
                 if (!codeRepository.existsByCodeGroupAndCodeValAndUseYn(group, value, "Y")) {

@@ -52,16 +52,19 @@ public class AuthController {
 
     @GetMapping("/me")
     public Map<String, Object> me(Authentication authentication) {
+        if (authentication == null) throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         String email = (String) authentication.getPrincipal();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인 정보를 확인해 주세요."));
 
         String role = authentication.getAuthorities().stream()
                 .findFirst().map(GrantedAuthority::getAuthority)
                 .orElse("ROLE_USER");
 
         return Map.of(
+                "userId", user.getUserId(),
                 "email", user.getEmail(),
                 "name", user.getName(),
                 "role", role

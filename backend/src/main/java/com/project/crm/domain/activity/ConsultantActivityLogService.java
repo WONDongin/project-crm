@@ -22,7 +22,7 @@ public class ConsultantActivityLogService {
 
     @Transactional
     public Long create(Long customerId, String email, CreateActivityLogRequestDto request) {
-        var author = userRepository.findByEmail(email)
+        var author = userRepository.findByEmailForWork(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 정보를 확인할 수 없습니다."));
         if (!"ROLE_CONSULTANT".equals(author.getRoles()) || !"ACTIVE".equals(author.getStatus())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "활성 상담사만 기록을 등록할 수 있습니다.");
@@ -45,7 +45,7 @@ public class ConsultantActivityLogService {
     }
     @Transactional
     public void update(Long customerId, Long activityId, String email, CreateActivityLogRequestDto request) {
-        var author = userRepository.findByEmail(email)
+        var author = userRepository.findByEmailForWork(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 정보를 확인할 수 없습니다."));
         if (!"ROLE_CONSULTANT".equals(author.getRoles()) || !"ACTIVE".equals(author.getStatus())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "활성 상담사만 기록을 수정할 수 있습니다.");
