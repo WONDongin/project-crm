@@ -8,7 +8,8 @@ import { getConscustomers, updateConsCustomer } from "@/lib/api/consultant.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
 import type { CustomerEntry, CustomerPage, Query } from "./types";
-import styles from "./Customers.module.css";
+import adminStyles from "./Customers.module.css";
+import consultantStyles from "./ConsultantCustomers.module.css";
 
 type Counselor = { userId: number; name: string; email: string };
 type Draft = { status?: string; customerTag?: string; counselorId?: string };
@@ -18,6 +19,7 @@ function errorMessage(cause: unknown) {
   return "요청을 처리하지 못했습니다. 다시 시도해 주세요.";
 }
 export default function CustomerList({ admin, initialStatus = "" }: { admin: boolean; initialStatus?: string }) {
+  const styles = admin ? adminStyles : consultantStyles;
   const initial: Query = { keyword: "", status: initialStatus, interestCourse: "", counselor: "", page: 0 };
   const [query, setQuery] = useState(initial);
   const [filters, setFilters] = useState(initial);
@@ -98,7 +100,7 @@ export default function CustomerList({ admin, initialStatus = "" }: { admin: boo
   return <section className={styles.page} aria-busy={loading}>
     <header className={styles.header}><div><h1>고객 관리</h1><p>{admin ? "전체 고객을 조회하고 담당 상담사를 배정합니다." : "본인 담당 고객을 검색하고 상태와 상담 기록을 관리합니다."}</p></div>
       {!admin && <Link href="/consultant/dashboard">대시보드로</Link>}</header>
-    <form className={styles.filters} aria-label="고객 검색 조건" onSubmit={search}>
+    <div className={styles.panel}><form className={styles.filters} aria-label="고객 검색 조건" onSubmit={search}>
       <fieldset disabled={busy !== null || loading}>
         <label className={styles.keyword}>이름·연락처<input aria-label="이름·연락처 검색" placeholder="고객명 또는 연락처" maxLength={100} value={filters.keyword} onChange={event => setFilters({ ...filters, keyword: event.target.value })} /></label>
         <label>상태<select aria-label="상태 필터" value={filters.status} onChange={event => setFilters({ ...filters, status: event.target.value })}><option value="">전체 상태</option>
@@ -106,15 +108,15 @@ export default function CustomerList({ admin, initialStatus = "" }: { admin: boo
           {options("CUSTOMER_STATUS").map(code => <option key={code.code} value={code.code}>{code.name}</option>)}</select></label>
         <label>관심 과정<select aria-label="관심 과정 필터" value={filters.interestCourse} onChange={event => setFilters({ ...filters, interestCourse: event.target.value })}><option value="">전체 과정</option>{options("INTEREST_COURSE").map(code => <option key={code.code} value={code.code}>{code.name}</option>)}</select></label>
         {admin ? <label>담당자<select aria-label="담당자 필터" value={filters.counselor} onChange={event => setFilters({ ...filters, counselor: event.target.value })}><option value="">전체 담당자</option><option value="unassigned">미배정</option>{counselors.map(staff => <option key={staff.userId} value={staff.userId}>{staff.name} ({staff.email})</option>)}</select></label>
-          : <p className={styles.scope}>담당 범위<br /><strong>본인 담당 고객</strong></p>}
+          : null}
         <div className={styles.actions}><button className={styles.primary} type="submit">검색</button><button type="button" onClick={() => changeQuery({ ...initial, status: "" }, true)}>초기화</button></div>
       </fieldset>
     </form>
     {notice && <p className={styles.notice} role={notice.error ? "alert" : "status"}>{notice.text}</p>}
     {Object.keys(drafts).length > 0 && <p className={styles.muted}>저장하지 않은 변경사항이 있습니다.</p>}
     {loading ? <p role="status">고객 목록을 불러오는 중입니다.</p> : error ? <div role="alert" className={styles.notice}><p>{error}</p><button type="button" onClick={() => { setError(""); setLoading(true); setReload(value => value + 1); }}>다시 조회</button></div>
-      : <><p className={styles.summary}>전체 {data.totalElements}명{data.totalPages > 0 && ` · ${data.number + 1} / ${data.totalPages} 페이지`} · 페이지당 10명</p>
-        <div className={styles.scroll}><table className={styles.table}><thead><tr><th>고객명</th><th>연락처</th><th>관심 과정</th><th>상태</th>{!admin && <th>태그</th>}<th>{admin ? "현재 담당자" : "최근 상담일"}</th>{admin && <th>담당자 선택</th>}<th>관리</th></tr></thead>
+      : <><p className={styles.summary}>전체 {data.totalElements}명{data.totalPages > 0 && ` · ${data.number + 1} / ${data.totalPages} 페이지`} · 페이지당 10명{!admin && <span className={styles.scope}>본인 담당 고객</span>}</p>
+        <div className={styles.scroll} role="region" aria-label="고객 목록 표" tabIndex={0}><table className={styles.table}><thead><tr><th>고객명</th><th>연락처</th><th>관심 과정</th><th>상태</th>{!admin && <th>태그</th>}<th>{admin ? "현재 담당자" : "최근 상담일"}</th>{admin && <th>담당자 선택</th>}<th>관리</th></tr></thead>
           <tbody>{data.content.length === 0 ? <tr><td colSpan={7} className={styles.empty}>조건에 맞는 고객이 없습니다.</td></tr> : data.content.map(row => <tr key={row.customerId}>
             <td><strong>{row.name}</strong></td><td>{row.phone}</td><td>{name("INTEREST_COURSE", row.interestCourse)}</td>
             <td>{admin ? name("CUSTOMER_STATUS", row.status) : <select aria-label={`${row.name} 상태`} disabled={!hydrated || busy !== null} value={drafts[row.customerId]?.status ?? row.status} onChange={event => field(row,"status",event.target.value)}>
@@ -131,5 +133,5 @@ export default function CustomerList({ admin, initialStatus = "" }: { admin: boo
           </tr>)}</tbody></table></div>
         {data.totalPages > 0 && <nav className={styles.pagination} aria-label="고객 목록 페이지"><button type="button" disabled={data.number === 0 || busy !== null} onClick={() => changeQuery({ ...query, page: query.page - 1 })}>이전</button><span aria-live="polite">{data.number + 1} / {data.totalPages}</span><button type="button" disabled={data.number + 1 >= data.totalPages || busy !== null} onClick={() => changeQuery({ ...query, page: query.page + 1 })}>다음</button></nav>}
       </>}
-  </section>;
+  </div></section>;
 }

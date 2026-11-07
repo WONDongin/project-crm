@@ -29,3 +29,29 @@
 .recent th:first-child, .recent td:first-child { position: sticky; left: 0; background: white; z-index: 1; min-width: 100px; }
 .empty { color: #4b5563; padding: 20px 0; }
 @media (max-width: 700px) { .header, .recentHeader { flex-wrap: wrap; } .header h1 { font-size: 23px; } .overview { grid-template-columns: minmax(0,1fr); } .total { padding: 20px; } .statuses { grid-template-columns: repeat(2,minmax(0,1fr)); } .statusCell { padding: 20px; } .recent { padding: 18px; } }
+
+/* A안 공통 시각 체계 */
+.dashboard { color: var(--crm-ink); }
+.header { align-items: center; margin-bottom: 28px; }
+.header h1 { font-size: 32px; font-weight: 750; letter-spacing: -.035em; margin-bottom: 6px; }
+.header p, .recentHeader p { color: var(--crm-muted); }
+.dashboard button, .primary { border-color: transparent; border-radius: 8px; background: #e9edf2; font-weight: 600; padding: 11px 18px; }
+.dashboard a { color: var(--crm-action); text-decoration: none; font-weight: 600; }
+.dashboard a:hover { text-decoration: underline; }
+.dashboard a.primary { background: var(--crm-action); border-color: var(--crm-action); color: #fff; }
+.dashboard a.primary:hover { background: #1454bc; text-decoration: none; }
+.overview { border: 0; border-radius: 16px; grid-template-columns: 210px minmax(0,1fr); margin-bottom: 28px; padding: 12px; }
+.total { background: #edf4ff; border-radius: 10px; padding: 24px; }
+.total h2 { color: var(--crm-muted); font-weight: 600; }
+.total strong { font-size: 36px; color: var(--crm-action); }
+.statusCell { padding: 24px; border-radius: 8px; }
+.statusCell span { color: var(--crm-muted); }
+.statusCell strong { font-size: 28px; color: var(--crm-ink); font-weight: 650; }
+.statusCell:hover { background: #f2f6fc; text-decoration: none !important; }
+.recent { padding: 28px; border-radius: 16px; }
+.recentHeader h2 { font-size: 21px; font-weight: 700; letter-spacing: -.02em; }
+.recent td, .recent th { padding: 19px 12px; border-color: #edf0f3; white-space: nowrap; }
+.recent tr:hover td { background: #f8faff; }
+.recent td strong { font-weight: 700; }
+@media (max-width: 1100px) { .overview { grid-template-columns: 180px minmax(0,1fr); } .statuses { grid-template-columns: repeat(3,minmax(0,1fr)); } .statusCell { padding: 16px; } }
+@media (max-width: 640px) { .header { gap: 16px; margin-bottom: 20px; } .header h1 { font-size: 26px; } .header p { font-size: 14px; } .actions { width: 100%; } .overview { grid-template-columns: 1fr; padding: 12px; margin-bottom: 20px; } .total { display: flex; align-items: center; justify-content: space-between; padding: 16px; } .total h2 { margin: 0; } .total strong { font-size: 30px; } .statuses { grid-template-columns: repeat(2,minmax(0,1fr)); } .statusCell:last-child:nth-child(odd) { grid-column: 1 / -1; } .statusCell { gap: 6px; } .recent { padding: 20px 16px; } .recentHeader { gap: 12px; } .recentHeader h2 { font-size: 20px; } }

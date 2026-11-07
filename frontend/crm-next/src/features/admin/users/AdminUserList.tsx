@@ -36,11 +36,12 @@ export default function AdminUserList({ currentUserId }: { currentUserId: number
       <div><h1>사용자 관리</h1><p>관리자·상담사 계정과 담당 고객을 관리합니다.</p></div>
       <div className={styles.actions}><button type="button" disabled={loading} onClick={refresh}>목록 새로고침</button><button type="button" className={styles.primary} disabled={!hydrated || loading || !!error} onClick={() => setDialog({ mode: "create" })}>계정 생성</button></div>
     </header>
+    <div className={styles.panel}>
     {message && <p role="status" className={styles.notice}>{message}</p>}
     {error ? <div role="alert" className={styles.notice}><p>{error}</p><button type="button" onClick={refresh}>다시 조회</button></div>
       : loading ? <p role="status">사용자 목록을 불러오는 중입니다.</p>
       : <><p className={styles.summary}>계정 {users.length}개 · 활성 상담사 {users.filter(user => user.roles === "ROLE_CONSULTANT" && user.status === "ACTIVE").length}명</p>
-        <div className={styles.scroll}><table className={styles.table}>
+        <div className={styles.scroll} role="region" aria-label="사용자 목록 표" tabIndex={0}><table className={styles.table}>
           <thead><tr><th>사용자</th><th>역할</th><th>전공</th><th>상태</th><th className={styles.number}>담당 고객</th><th>최근 로그인</th><th>관리</th></tr></thead>
           <tbody>{users.length === 0 ? <tr><td colSpan={7} className={styles.empty}>등록된 계정이 없습니다.</td></tr> : users.map(user => <tr key={user.userId}>
             <td><strong>{user.name}{user.userId === currentUserId && <span className={styles.self}>본인</span>}</strong><small>{user.email}</small></td>
@@ -52,6 +53,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: number
               <button type="button" aria-label={`${user.name} 비밀번호 초기화`} onClick={() => setDialog({ mode: "password", user })}>비밀번호 초기화</button></div></td>
           </tr>)}</tbody>
         </table></div></>}
+    </div>
     {dialog && <UserEditModal mode={dialog.mode} user={dialog.user} currentUserId={currentUserId}
       onClose={() => setDialog(null)} onSaved={text => { setDialog(null); setMessage(text); refresh(); }} />}
   </section>;
