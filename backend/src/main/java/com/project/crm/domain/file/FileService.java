@@ -12,10 +12,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.Locale;
 
 @Service @RequiredArgsConstructor @Transactional
 public class FileService {
+    private static final String CATEGORY = "activity_logs";
     private final FileRepository files;
+    private final AttachmentStorage storage;
     private final ActivityLogRepository activities;
     private final CustomerRepository customers;
     private final UserRepository users;
@@ -39,32 +43,49 @@ public class FileService {
         return new Access(user, log);
     }
     public List<Attachment> list(Long customerId, Long activityId, String email) {
-        access(customerId, activityId, email, false);
-        return files.findByActivity_ActivityIdOrderByFileIdAsc(activityId).stream()
-                .map(f -> new Attachment(f.getFileId(), f.getOriginalName(), f.getContentType(), f.getSizeBytes(), f.getUploadedAt())).toList();
+        var log = access(customerId, activityId, email, false).activity();
+        if (log.getFileUploadNo() == null) return List.of();
+        return files.findByFileUploadNoAndFileCategoryAndDelYnOrderByFileIdAsc(log.getFileUploadNo(), CATEGORY, "N").stream()
+                .map(f -> new Attachment(f.getFileId(), f.getOriginalName(), contentType(f.getOriginalName()), f.getSizeBytes(), f.getUploadedAt())).toList();
     }
     public Long upload(Long customerId, Long activityId, String email, MultipartFile file) {
         var access = access(customerId, activityId, email, true);
-        if (files.countByActivity_ActivityId(activityId) >= 10) throw new ResponseStatusException(HttpStatus.CONFLICT, "기록당 최대 10개까지 첨부할 수 있습니다.");
+        if (files.countByFileUploadNoAndFileCategoryAndDelYn(access.activity().getFileUploadNo(), CATEGORY, "N") >= 10) throw new ResponseStatusException(HttpStatus.CONFLICT, "기록당 최대 10개까지 첨부할 수 있습니다.");
         if (file.getSize() > AttachmentValidator.MAX_BYTES) throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "파일당 10MB까지 첨부할 수 있습니다.");
         String name = AttachmentValidator.safeName(file.getOriginalFilename());
         try (var input = file.getInputStream()) {
             byte[] bytes = input.readNBytes(AttachmentValidator.MAX_BYTES + 1);
-            String type = AttachmentValidator.type(name, bytes);
-            return files.save(FileMeta.builder().activity(access.activity()).originalName(name).contentType(type)
-                    .sizeBytes(bytes.length).uploadedBy(access.user().getUserId()).uploadedAt(LocalDateTime.now()).content(bytes).build()).getFileId();
+            AttachmentValidator.type(name, bytes);
+            if (access.activity().getFileUploadNo() == null) {
+                // 기존 그룹 번호는 유지하고, 새 그룹은 양수 난수로 생성한다.
+                long group;
+                do { group = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE; }
+                while (group == 0 || files.existsByFileUploadNo(group) || activities.existsByFileUploadNo(group));
+                access.activity().setFileUploadNo(group);
+            }
+            var stored = storage.write(bytes);
+            return files.save(FileMeta.builder().fileUploadNo(access.activity().getFileUploadNo()).fileCategory(CATEGORY)
+                    .originalName(name).savedName(stored.name()).filePath(stored.directory())
+                    .sizeBytes(bytes.length).delYn("N").uploadedAt(LocalDateTime.now()).build()).getFileId();
         } catch (IOException e) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일을 읽을 수 없습니다."); }
     }
     public Download download(Long customerId, Long activityId, Long fileId, String email) {
-        access(customerId, activityId, email, false);
-        var file = files.findByFileIdAndActivity_ActivityId(fileId, activityId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return new Download(file.getOriginalName(), file.getContentType(), file.getContent());
+        var log = access(customerId, activityId, email, false).activity();
+        var file = attachment(log, fileId);
+        return new Download(file.getOriginalName(), contentType(file.getOriginalName()), storage.read(file));
     }
     public void delete(Long customerId, Long activityId, Long fileId, String email) {
-        access(customerId, activityId, email, true);
-        var file = files.findByFileIdAndActivity_ActivityId(fileId, activityId)
+        var log = access(customerId, activityId, email, true).activity();
+        attachment(log, fileId).markDeleted();
+        // 논리 삭제: 롤백과 복구를 위해 실제 파일은 보존한다. 별도 보존 정책에 따라 정리한다.
+    }
+    private FileMeta attachment(ActivityLog log, Long fileId) {
+        if (log.getFileUploadNo() == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return files.findByFileIdAndFileUploadNoAndFileCategoryAndDelYn(fileId, log.getFileUploadNo(), CATEGORY, "N")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        files.delete(file);
+    }
+    private String contentType(String name) {
+        String extension = name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+        return AttachmentValidator.TYPES.getOrDefault(extension, "application/octet-stream");
     }
 }

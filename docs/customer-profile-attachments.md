@@ -6,8 +6,8 @@
 
 1. 먼저 SQL 상단 중복 고객 조회만 실행한다. 결과가 있으면 연락처/생년월일이 같은 고객을 확인하고 정리한 후 진행한다. 스크립트는 고객을 자동 병합하거나 삭제하지 않는다.
 2. customers에 정규화된 연락처/생년월일 generated column과 UNIQUE 인덱스를 추가한다. 기존 연락처 값은 변경하지 않는다.
-3. activity_attachments 테이블을 생성한다.
-4. MySQL max_allowed_packet이 32MB 이상인지 확인한다. 최대 파일은 10MB지만 쿼리 전송 오버헤드가 있으므로 여유를 둔다.
+3. 기존 `file_mng` 테이블과 `activity_logs.file_upload_no` 컬럼을 사용한다. 새 첨부 테이블이나 BLOB 컬럼은 만들지 않는다. 첨부파일을 위한 `max_allowed_packet` 변경도 필요 없다.
+4. `ATTACHMENT_DIR`를 실제 파일 저장 폴더로 설정한다. 기본값은 백엔드 실행 위치 기준 `./uploads/attachments`다. 이 폴더는 정적 리소스로 공개하지 않으며, DB와 함께 백업한다. 다중 인스턴스에서는 동일한 영속 볼륨을 사용한다.
 5. 로컬/프록시에 별도 multipart 제한이 있다면 파일 10MB, 요청 11MB 이상을 허용한다.
 
 SQL은 반복 실행용이 아니다. 이미 적용한 DB에서는 다시 실행하지 않는다. 운영 DB 적용은 실행하지 않았다.
@@ -26,10 +26,10 @@ SQL은 반복 실행용이 아니다. 이미 적용한 DB에서는 다시 실행
 
 경로: /consultant/customers/{customerId}/activities/{activityId}/attachments
 
-- GET: 메타데이터 목록. 파일 본문은 목록 projection에서 제외.
+- GET: `file_mng` 메타데이터 목록. 실제 파일은 목록 조회 시 읽지 않는다.
 - POST: multipart/form-data, file 파트 1개. 생성 파일 ID 반환(201).
 - GET /{fileId}: 다운로드, Content-Disposition attachment, UTF-8 파일명, nosniff, no-store.
-- DELETE /{fileId}: 메타데이터/본문 삭제.
+- DELETE /{fileId}: `del_yn=Y`, `updated_at` 갱신. 삭제 파일은 목록과 다운로드에서 제외한다. 실제 파일은 보존하며 물리 삭제는 별도 보존 정책으로 처리한다.
 
 지원: PNG/JPG/JPEG/GIF/WEBP, PDF, UTF-8 TXT, DOCX/XLSX/PPTX. HWP, DOC/XLS/PPT, ZIP, 실행파일은 지원하지 않는다.
 
@@ -41,8 +41,12 @@ SQL은 반복 실행용이 아니다. 이미 적용한 DB에서는 다시 실행
 - 현재 담당자는 과거 작성자의 첨부도 목록 조회/다운로드 가능.
 - 추가/삭제는 현재 담당 고객 + 본인 작성 CONSULTANT 기록만 허용. SYSTEM 원본 변경 차단.
 - 고객/기록/파일 ID 조합을 매번 검사. 고객 행 잠금으로 배정 변경과 개수 제한 검사 직렬화.
-- 파일은 LONGBLOB으로 DB에 저장하여 메타데이터/본문을 한 트랜잭션으로 관리. 별도 업로드 폴더 불필요.
-- 기존 activity_logs.file_upload_no는 변경하지 않고 신규1:N 테이블 사용.
+- `activity_logs.file_upload_no = file_mng.file_upload_no`와 `file_category='activity_logs'`로 연결한다. 기존 그룹 번호는 유지하고, 첫 업로드 시 그룹 번호가 없으면 양수 난수를 생성하여 기존 그룹과 중복 여부를 확인한다.
+- `file_seq`(파일 ID), `file_nm`(원본명), `file_save_nm`(UUID 저장명), `file_path`(저장 폴더), `file_size`, `del_yn`, `created_at`, `updated_at`을 기존 컬럼에 매핑한다. MIME은 파일명으로 응답하며 신규 업로드 내용은 기존 헤더 검증을 통과해야 한다.
+- 신규 파일은 설정 폴더 바로 아래 저장하며 `file_path='.'`를 기록한다. 기존 파일의 상대 경로는 설정 폴더 기준으로 해석한다. 절대 경로는 설정 폴더 내부에 있을 때만 허용한다. 기존 경로·카테고리 값이 이 규칙과 일치하는지 적용 전에 확인한다.
+- 업로드 DB 트랜잭션이 롤백되면 방금 저장한 파일도 정리한다. 커밋 결과 불명 또는 프로세스 강제 종료 시에는 파일이 남을 수 있으므로, DB에 연결되지 않은 파일의 정리는 별도 운영 작업이다.
+- 논리 삭제는 본문을 즉시 제거하지 않아 롤백 시 복구 가능하다. 삭제한 파일은 10개 제한에서 제외한다.
+- 기존에 잘못된 안내를 따라 `activity_attachments`를 생성했더라도 이 변경은 기존 테이블이나 데이터를 삭제하지 않는다. 해당 테이블에 이미 실제 첨부가 있다면 이관을 먼저 검토해야 한다.
 
 ## 화면
 
@@ -56,5 +60,5 @@ SQL은 반복 실행용이 아니다. 이미 적용한 DB에서는 다시 실행
 - 외부 Google Fonts 호출을 임시 제외한 production 빌드 통과. 폰트 소스는 복구했고 변경을 커밋하지 않음.
 - production + 모의 API 브라우저 통과: 고객 중복409 입력 유지·수정 후 재조회, PNG/PDF 업로드, 다운로드 파일명과 본문, 삭제 확인/취소, 이전 작성자 읽기 전용,10MB 초과 클라이언트 차단, 형식400 입력 유지,403 접근 제한.
 - 1440/768/390px 가로 넘침 검사 및 스크린샷 확인.
-- 백엔드 통합/MVC/파일 검증 테스트 추가. Gradle 다운로드가 Network is unreachable로 실패하여 실행하지 못함.
-- MySQL 마이그레이션, 실제 파일/DB 저장과 다운로드, 최대 크기·동시 요청은 추가 확인 필요.
+- 백엔드 통합/MVC/파일 검증 테스트 추가. 기존 그룹 유지·테이블 카테고리 격리·논리 삭제·파일 롤백 정리 및 경로 제한 검증을 추가했다. Gradle 다운로드가 Network is unreachable로 실패하여 실행하지 못함.
+- MySQL 기존 file_mng 매핑과 파일 경로, 고객 인덱스 마이그레이션, 실제 파일/DB 저장과 다운로드, 최대 크기·동시 요청은 추가 확인 필요.

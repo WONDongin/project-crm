@@ -99,3 +99,7 @@ frontend/.swc
 ############################
 frontend/.DS_Store
 frontend/.idea
+
+# 상담 첨부파일 실제 저장소
+/uploads/
+/backend/uploads/

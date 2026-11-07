@@ -12,19 +12,6 @@ ALTER TABLE customers
     ADD COLUMN birth_identity DATE GENERATED ALWAYS AS (COALESCE(birth_date, '1000-01-01')) STORED,
     ADD CONSTRAINT uk_customer_phone_birth UNIQUE (phone_identity, birth_identity);
 
--- 3. 첨부 메타데이터와 본문을 같은 트랜잭션으로 저장/삭제한다.
-CREATE TABLE activity_attachments (
-    file_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    activity_id BIGINT NOT NULL,
-    original_name VARCHAR(200) NOT NULL,
-    content_type VARCHAR(100) NOT NULL,
-    size_bytes BIGINT NOT NULL,
-    uploaded_by BIGINT NOT NULL,
-    uploaded_at DATETIME(6) NOT NULL,
-    content LONGBLOB NOT NULL,
-    CONSTRAINT fk_attachment_activity FOREIGN KEY (activity_id) REFERENCES activity_logs(activity_id),
-    CONSTRAINT fk_attachment_uploader FOREIGN KEY (uploaded_by) REFERENCES users(user_id),
-    CONSTRAINT chk_attachment_size CHECK (size_bytes > 0 AND size_bytes <= 10485760),
-    INDEX idx_attachment_activity (activity_id, file_id)
-);
--- max_allowed_packet은 최대 파일과 쿼리 오버헤드를 수용하도록 32MB 이상으로 설정한다.
+-- 첨부파일은 기존 file_mng와 activity_logs.file_upload_no를 사용한다.
+-- 신규 첨부 테이블 / BLOB 컬럼 / max_allowed_packet 변경은 필요하지 않다.
+-- 기존 file_mng의 파일 그룹 번호와 데이터는 그대로 유지한다.

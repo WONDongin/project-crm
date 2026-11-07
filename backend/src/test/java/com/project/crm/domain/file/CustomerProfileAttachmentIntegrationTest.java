@@ -13,12 +13,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.*;
+import java.nio.file.Path;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect"})
 @AutoConfigureTestDatabase(replace=AutoConfigureTestDatabase.Replace.ANY)
-@Import({FileService.class, CustomerProfileService.class})
+@Import({FileService.class, AttachmentStorage.class, CustomerProfileService.class})
 class CustomerProfileAttachmentIntegrationTest {
+    @TempDir static Path directory;
+    @DynamicPropertySource static void storageProperties(DynamicPropertyRegistry properties) {
+        properties.add("app.attachments.dir", () -> directory.toString());
+    }
     @Autowired TestEntityManager em;
     @Autowired FileService files;
     @Autowired FileRepository repository;
@@ -56,7 +64,7 @@ class CustomerProfileAttachmentIntegrationTest {
         customer.setCounselor(other);em.flush();em.clear();
         assertStatus(403, () -> profiles.update(customer.getCustomerId(),owner.getEmail(),new UpdateCustomerProfileRequestDto("이름","01012345678","SPRING")));
     }
-    @Test void uploadsListsDownloadsAndDeletesBytesWithoutChangingRecord() {
+    @Test void uploadsListsDownloadsAndSoftDeletesWithoutChangingRecord() {
         Long id=files.upload(customer.getCustomerId(),log.getActivityId(),owner.getEmail(),upload());
         em.flush();em.clear();
         assertThat(files.list(customer.getCustomerId(),log.getActivityId(),owner.getEmail())).hasSize(1);
@@ -65,7 +73,9 @@ class CustomerProfileAttachmentIntegrationTest {
         assertThat(downloaded.type()).isEqualTo("application/pdf");
         assertThat(em.find(ActivityLog.class,log.getActivityId()).getContent()).isEqualTo("상담 원문");
         files.delete(customer.getCustomerId(),log.getActivityId(),id,owner.getEmail());em.flush();em.clear();
-        assertThat(repository.findById(id)).isEmpty();
+        assertThat(repository.findById(id)).get().extracting(FileMeta::getDelYn).isEqualTo("Y");
+        assertThat(files.list(customer.getCustomerId(),log.getActivityId(),owner.getEmail())).isEmpty();
+        assertStatus(404,()->files.download(customer.getCustomerId(),log.getActivityId(),id,owner.getEmail()));
     }
     @Test void reassignmentAllowsNewOwnerToReadButNeitherCanChangeOldAuthorsFiles() {
         Long id=files.upload(customer.getCustomerId(),log.getActivityId(),owner.getEmail(),upload());
@@ -91,6 +101,27 @@ class CustomerProfileAttachmentIntegrationTest {
         assertStatus(409,()->files.upload(customer.getCustomerId(),log.getActivityId(),owner.getEmail(),upload()));
         owner.setStatus("INACTIVE");em.flush();
         assertStatus(403,()->files.list(customer.getCustomerId(),log.getActivityId(),owner.getEmail()));
+    }
+    @Test void preservesExistingGroupAndFiltersCategoryAndDeletedFiles() {
+        log.setFileUploadNo(123456L);
+        em.flush();
+        Long id=files.upload(customer.getCustomerId(),log.getActivityId(),owner.getEmail(),upload());
+        em.flush();em.clear();
+        var saved=repository.findById(id).orElseThrow();
+        assertThat(saved.getFileUploadNo()).isEqualTo(123456L);
+        assertThat(saved.getFileCategory()).isEqualTo("activity_logs");
+        assertThat(saved.getSavedName()).isNotEqualTo(saved.getOriginalName());
+        assertThat(em.find(ActivityLog.class,log.getActivityId()).getFileUploadNo()).isEqualTo(123456L);
+        var unrelated=em.persistAndFlush(FileMeta.builder().fileUploadNo(123456L).fileCategory("other_table")
+                .originalName("private.pdf").savedName("private").filePath(".").sizeBytes(10)
+                .delYn("N").uploadedAt(LocalDateTime.now()).build());
+        assertThat(files.list(customer.getCustomerId(),log.getActivityId(),owner.getEmail()))
+                .extracting(FileService.Attachment::fileId).containsExactly(id);
+        assertStatus(404,()->files.download(customer.getCustomerId(),log.getActivityId(),unrelated.getFileId(),owner.getEmail()));
+        files.delete(customer.getCustomerId(),log.getActivityId(),id,owner.getEmail());
+        em.flush();
+        assertThat(files.list(customer.getCustomerId(),log.getActivityId(),owner.getEmail())).isEmpty();
+        assertThat(java.nio.file.Files.exists(directory.resolve(saved.getSavedName()))).isTrue();
     }
     private MockMultipartFile upload(){return new MockMultipartFile("file","상담.pdf","application/pdf",pdf);}
     private User user(String email){return em.persistAndFlush(User.builder().email(email).password("hash").name(email).roles("ROLE_CONSULTANT").status("ACTIVE").build());}
