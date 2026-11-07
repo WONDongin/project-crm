@@ -14,6 +14,7 @@ export default function ActivityAttachments({ customerId, activityId, editable, 
   const [files, setFiles] = useState<Attachment[] | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState(false);
   const running = useRef(false);
   const [deleting, setDeleting] = useState<number | null>(null);
@@ -25,11 +26,15 @@ export default function ActivityAttachments({ customerId, activityId, editable, 
     const controller = new AbortController();
     getConsAttachments(customerId, activityId, controller.signal).then(response => {
       if (!response.success) throw new Error("조회 실패");
-      if (!controller.signal.aborted) { setFiles(response.data); setError(""); }
+      if (!controller.signal.aborted) { setFiles(response.data); setLoadError(""); }
     }).catch(cause => {
       if (controller.signal.aborted) return;
-      if (isAxiosError(cause) && [403,404].includes(cause.response?.status || 0)) onRestricted();
-      else setError("첨부파일을 불러오지 못했습니다. 다시 조회해 주세요.");
+      const status = isAxiosError(cause) ? cause.response?.status : undefined;
+      if (status === 403) { onRestricted(); return; }
+      setFiles(null);
+      setLoadError(status === 404
+        ? "첨부파일 목록을 찾을 수 없습니다. 상담 기록을 다시 확인해 주세요."
+        : "첨부파일을 불러오지 못했습니다. 다시 조회해 주세요.");
     });
     return () => controller.abort();
   }, [open, attempt, customerId, activityId, onRestricted]);
@@ -40,7 +45,13 @@ export default function ActivityAttachments({ customerId, activityId, editable, 
     try { await operation(); }
     catch (cause) {
       const status = isAxiosError(cause) ? cause.response?.status : undefined;
-      if (status === 403 || status === 404) { onRestricted(); return; }
+      if (status === 403) { onRestricted(); return; }
+      if (status === 404) {
+        setError("첨부파일 또는 상담 기록을 찾을 수 없습니다. 목록을 다시 확인해 주세요.");
+        setDeleting(null);
+        setAttempt(value => value + 1);
+        return;
+      }
       setError(status === 413 ? "파일당 10MB까지 첨부할 수 있습니다."
         : status === 409 ? "기록당 최대 10개까지 첨부할 수 있습니다."
         : status === 400 ? "파일 확장자와 실제 형식, 파일명을 확인해 주세요."
@@ -52,10 +63,10 @@ export default function ActivityAttachments({ customerId, activityId, editable, 
       onClick={() => setOpen(!open)}>첨부파일 {open ? "접기" : "보기"}</button>
     {open && <div aria-busy={busy}>
       <p className={styles.contentTitle}>PNG·JPG·GIF·WEBP·PDF·TXT·DOCX·XLSX·PPTX · 파일당 10MB · 기록당 최대 10개</p>
-      {error && <div role="alert"><p>{error}</p><button type="button" disabled={busy}
-        onClick={() => setAttempt(v => v + 1)}>다시 조회</button></div>}
+      {(error || loadError) && <div role="alert"><p>{error || loadError}</p><button type="button" disabled={busy}
+        onClick={() => { setError(""); setLoadError(""); setFiles(null); setAttempt(v => v + 1); }}>다시 조회</button></div>}
       {message && <p role="status">{message}</p>}
-      {files === null ? (!error && <p role="status">첨부파일을 불러오는 중입니다.</p>) : files.length === 0 ? <p>첨부파일이 없습니다.</p> :
+      {files === null ? (!(error || loadError) && <p role="status">첨부파일을 불러오는 중입니다.</p>) : files.length === 0 ? <p>첨부파일이 없습니다.</p> :
         <ul className={styles.attachmentList}>{files.map(file => <li key={file.fileId}>
           <span className={styles.fileName}>{file.originalName} <small>({(file.sizeBytes / 1024).toFixed(1)} KB)</small></span>
           <div className={styles.formActions}>

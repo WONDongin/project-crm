@@ -5,9 +5,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class AttachmentStorageTest {
     @TempDir Path directory;
@@ -32,16 +34,27 @@ class AttachmentStorageTest {
         try (var paths = Files.list(directory)) { assertThat(paths.count()).isZero(); }
     }
 
-    @Test void readsManagedFileAndRejectsTraversalAndSymlinkEscape() throws Exception {
+    @Test void readsManagedFileAndRejectsTraversal() throws Exception {
         var root = Files.createDirectory(directory.resolve("managed"));
         var storage = new AttachmentStorage(root.toString());
         Files.write(root.resolve("valid"), new byte[]{1,2,3});
         assertThat(storage.read(FileMeta.builder().filePath(".").savedName("valid").build()))
                 .containsExactly(1,2,3);
-        var outside = Files.write(directory.resolve("private"), new byte[]{4});
+        Files.write(directory.resolve("private"), new byte[]{4});
         assertNotFound(storage, FileMeta.builder().filePath("..").savedName("private").build());
         assertNotFound(storage, FileMeta.builder().filePath(".").savedName("../private").build());
-        Files.createSymbolicLink(root.resolve("link"), outside);
+    }
+
+    @Test void rejectsSymlinkEscapeWhenEnvironmentAllowsLinks() throws Exception {
+        var root = Files.createDirectory(directory.resolve("managed"));
+        var storage = new AttachmentStorage(root.toString());
+        var outside = Files.write(directory.resolve("private"), new byte[]{4});
+        try {
+            Files.createSymbolicLink(root.resolve("link"), outside);
+        } catch (IOException | UnsupportedOperationException | SecurityException exception) {
+            // 링크 생성 능력만 확인한다. 아래 저장소 검증의 실패는 건너뛰지 않는다.
+            assumeTrue(false, "이 환경은 심볼릭 링크 생성 권한 또는 지원이 없습니다: " + exception.getMessage());
+        }
         assertNotFound(storage, FileMeta.builder().filePath(".").savedName("link").build());
     }
     private void assertNotFound(AttachmentStorage storage, FileMeta file) {
