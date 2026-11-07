@@ -215,16 +215,19 @@ public class CustomerService {
                         );
                 }
 
-                Customer customer = customerRepository
-                        .findByPhoneAndBirthDate(
-                                request.getPhone(),
-                                request.getBirthDate()
-                        )
-                        .orElseGet(() -> {
+                validateApplicationCode("INTEREST_COURSE", request.getInterestCourse());
+                validateApplicationCode("CONSULT_TIME", request.getPreferredTime());
+                validateApplicationCode("LEAD_SOURCE", request.getLeadSource());
+                String phone = CustomerProfileService.normalizePhone(request.getPhone());
+                var matches = customerRepository.findIdentityMatches(phone, request.getBirthDate(), -1L);
+                if (matches.size() > 1) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "중복 고객 정보 확인이 필요합니다.");
+                }
+                Customer customer = matches.stream().findFirst().orElseGet(() -> {
 
                                 Customer newCustomer = Customer.builder()
                                         .name(request.getName())
-                                        .phone(request.getPhone())
+                                        .phone(phone)
                                         .birthDate(request.getBirthDate())
                                         .email(request.getEmail())
                                         .interestCourse(request.getInterestCourse())
@@ -241,5 +244,10 @@ public class CustomerService {
                         request.getPreferredTime(),
                         request.getContent()
                 );
+        }
+        private void validateApplicationCode(String group, String value) {
+                if (!codeRepository.existsByCodeGroupAndCodeValAndUseYn(group, value, "Y")) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용 가능한 신청 항목을 선택해 주세요.");
+                }
         }
 }

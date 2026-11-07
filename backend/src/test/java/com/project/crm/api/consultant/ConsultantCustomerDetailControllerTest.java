@@ -35,11 +35,30 @@ class ConsultantCustomerDetailControllerTest {
 
     @Autowired MockMvc mockMvc;
     @MockitoBean com.project.crm.domain.activity.ConsultantActivityLogService activityLogService;
+    @MockitoBean com.project.crm.domain.customer.CustomerProfileService profileService;
     @MockitoBean CustomerService customerService;
     @MockitoBean ConsultantCustomerDetailService detailService;
     @MockitoBean UserRepository userRepository;
     @MockitoBean JwtUtil jwtUtil;
 
+
+
+    @Test void profileUsesLoginAndValidatesRequest() throws Exception {
+        var request = new com.project.crm.domain.customer.dto.UpdateCustomerProfileRequestDto("새 이름", "010-9876-5432", "JAVA");
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/profile")
+                .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json")
+                .content("""
+                        {"name":"새 이름","phone":"010-9876-5432","interestCourse":"JAVA","counselorId":999}
+                        """))
+                .andExpect(status().isOk());
+        verify(profileService).update(10L, "owner@example.com", request);
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/profile")
+                .with(authentication(login("ROLE_CONSULTANT"))).contentType("application/json").content("{}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/consultant/customers/10/profile")
+                .contentType("application/json").content("{}"))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
     void updateUsesAuthenticatedAuthorAndValidatesInputAndRoles() throws Exception {

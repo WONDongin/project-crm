@@ -33,11 +33,12 @@ public class User {
     @Column(nullable = false, length = 20)
     private String roles;
 
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     private String specialty;
 
     @Column(nullable = false, length = 20)
-    private String status;
+    @Builder.Default
+    private String status = "ACTIVE";
 
     @Column(name = "memo", columnDefinition = "TEXT")
     private String memo;

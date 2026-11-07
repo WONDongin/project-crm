@@ -5,6 +5,11 @@ spring:
   profiles:
     active: local
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -13,3 +18,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
+
+app:
+  attachments:
+    dir: ${ATTACHMENT_DIR:./uploads/attachments}

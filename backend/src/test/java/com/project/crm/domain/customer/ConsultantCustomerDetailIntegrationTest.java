@@ -116,7 +116,7 @@ class ConsultantCustomerDetailIntegrationTest {
         log(customer, "SYSTEM", "COMPLETED", "시스템 처리", null);
         Customer anotherCustomer = entityManager.persistAndFlush(Customer.builder()
                 .name("다른 고객").phone("010-9999-9999").interestCourse("JAVA")
-                .leadSource("WEB").status("NEW").counselor(owner).build());
+                .birthDate(LocalDate.of(1998,1,1)).leadSource("WEB").status("NEW").counselor(owner).build());
         log(anotherCustomer, "SYSTEM", "RECEIVED", "다른 고객 신청", "AM");
         entityManager.clear();
 
@@ -144,7 +144,7 @@ class ConsultantCustomerDetailIntegrationTest {
         setReceivedAt(older, date.minusDays(1));
         Customer another = entityManager.persistAndFlush(Customer.builder()
                 .name("다른 고객").phone("010-0000-0000").interestCourse("JAVA")
-                .leadSource("WEB").status("NEW").counselor(owner).build());
+                .birthDate(LocalDate.of(1998,1,1)).leadSource("WEB").status("NEW").counselor(owner).build());
         log(another, "SYSTEM", "RECEIVED", "다른 고객 신청", "AM");
         entityManager.clear();
 
@@ -231,7 +231,7 @@ class ConsultantCustomerDetailIntegrationTest {
 
     private User user(String email) {
         return entityManager.persistAndFlush(User.builder().email(email).password("test-hash")
-                .name(email).roles("ROLE_CONSULTANT").status("ACTIVE").build());
+                .name(email).roles("ROLE_CONSULTANT").specialty("BACKEND").status("ACTIVE").build());
     }
 
     private ActivityLog log(Customer target, String createdBy, String result, String content, String time) {

@@ -8,6 +8,7 @@ import { getConsCustomerDetail } from "@/lib/api/consultant.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
 import type { CustomerDetail as CustomerDetailData } from "@/types/customerDetail";
+import CustomerProfileForm from "./CustomerProfileForm";
 import CustomerHistory from "./CustomerHistory";
 import styles from "./CustomerDetail.module.css";
 
@@ -126,6 +127,8 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
                 </div>
               ))}
             </dl>
+            {customer && <CustomerProfileForm customer={customer} onRestricted={handleHistoryRestricted}
+              onSaved={() => setAttempt(value => value + 1)} />}
           </section>
 
           <section className={styles.section} aria-labelledby="application-information">

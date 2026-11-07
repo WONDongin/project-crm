@@ -87,7 +87,7 @@
 .formFields { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .formFields label { display: grid; gap: 6px; min-width: 0; }
 .formFields label span { color: var(--detail-muted); font-size: 12px; }
-.formFields select, .formFields textarea { width: 100%; min-height: 44px; padding: 10px; border: 1px solid #9ca3af; border-radius: 6px; background: white; color: var(--detail-ink); font: inherit; }
+.formFields input, .formFields select, .formFields textarea { width: 100%; min-height: 44px; padding: 10px; border: 1px solid #9ca3af; border-radius: 6px; background: white; color: var(--detail-ink); font: inherit; }
 .formFields textarea { resize: vertical; }
 .fullField, .formActions { grid-column: 1 / -1; }
 .formActions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -96,3 +96,14 @@
 .formActions button:disabled { opacity: .6; cursor: default; }
 .formFields :focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 3px; }
 @media (max-width: 480px) { .formFields { grid-template-columns: minmax(0, 1fr); } }
+
+.attachments { margin-top: 20px; }
+.attachmentButton { min-height: 44px; padding: 8px 12px; border: 1px solid var(--detail-line); border-radius: 6px; background: white; color: var(--detail-ink); cursor: pointer; }
+.attachmentList { list-style: none; margin: 16px 0; padding: 0; }
+.attachmentList li { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--detail-line); }
+.fileName { overflow-wrap: anywhere; min-width: 0; }
+.fileName small { color: var(--detail-muted); }
+.uploadLabel { display: grid; gap: 8px; margin-top: 16px; }
+.uploadLabel input { max-width: 100%; min-height: 44px; }
+.attachments button:disabled { opacity: .6; cursor: default; }
+.attachments button:focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 3px; }

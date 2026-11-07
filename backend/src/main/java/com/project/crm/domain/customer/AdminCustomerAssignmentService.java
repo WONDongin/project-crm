@@ -38,7 +38,7 @@ public class AdminCustomerAssignmentService {
     // 고객 담당 상담사 배정 및 변경
     @Transactional
     public void assignCounselor(Long customerId, Long counselorId) {
-        Customer customer = customerRepository.findById(customerId)
+        Customer customer = customerRepository.findByIdForUpdate(customerId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "고객을 찾을 수 없습니다."
