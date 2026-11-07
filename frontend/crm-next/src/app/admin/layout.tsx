@@ -6,6 +6,8 @@ import { getCurrentUser } from "@/lib/server/auth";
 import CodeInitializer from "@/components/common/CodeInitializer";
 import styles from "./AdminLayout.module.css";
 import Link from "next/link";
+import AdminNav from "@/components/admin/AdminNav";
+import theme from "@/styles/CrmTheme.module.css";
 
 export default async function layout({
   children,
@@ -19,42 +21,20 @@ export default async function layout({
   }
 
   return (
-    <div className={styles.layout}>
+    <div className={`${theme.theme} ${styles.layout}`}>
       <CodeInitializer />
 
-      <aside className={styles.sidebar}>
-        <h1 className={styles.logo}>Consultant</h1>
-
-        <div className={styles.userBox}>
-          <span className={styles.userName}>{user.name}님</span>
-
-          <LogoutButton />
+      <a className={styles.skipLink} href="#main-content">본문으로 이동</a>
+      <header className={styles.topbar}>
+        <div className={styles.topbarInner}>
+          <Link href="/admin/dashboard" className={styles.brand} aria-label="DIHS CRM 관리자 메인">DIHS<span>CRM</span></Link>
+          <span className={styles.product}>관리자</span>
+          <AdminNav />
+          <div className={styles.account}><span>{user.name} · 관리자</span><LogoutButton /></div>
         </div>
+      </header>
 
-        <h3 className={styles.menuTitle}>관리자 메뉴</h3>
-
-        <ul className={styles.menuList}>
-          <li className={styles.menuItem}>
-            <Link href="/admin/dashboard" className={styles.menuLink}>
-              대시보드
-            </Link>
-          </li>
-
-          <li className={styles.menuItem}>
-            <Link href="/admin/users" className={styles.menuLink}>
-              사용자 관리
-            </Link>
-          </li>
-
-          <li className={styles.menuItem}>
-            <Link href="/admin/customers" className={styles.menuLink}>
-              고객 관리
-            </Link>
-          </li>
-        </ul>
-      </aside>
-
-      <main className={styles.main}>{children}</main>
+      <main id="main-content" className={styles.main}>{children}</main>
     </div>
   );
 }

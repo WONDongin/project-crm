@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { applyConsult } from "@/lib/api/consult.api";
@@ -112,28 +113,29 @@ export default function ConsultApplyPage() {
   };
 
   if (!hydrated) {
-    return <div>공통코드 로딩중...</div>;
+    return <div className={styles.applyPage} role="status">상담 신청 정보를 불러오는 중입니다.</div>;
   }
 
   return (
-    <div className={styles.applyPage}>
+    <main className={styles.applyPage}>
       <div className={styles.applyCard}>
         <div className={styles.logoBox}>
-          <div className={styles.logo}>CRM</div>
+          <Link href="/" className={styles.brand} aria-label="DIHS CRM 홈">DIHS<span>CRM</span></Link>
 
           <h1 className={styles.title}>상담 신청</h1>
 
-          <p className={styles.desc}>상담 정보를 입력해주세요.</p>
+          <p className={styles.desc}>관심 과정과 상담 내용을 남겨주시면 담당 상담사가 연락드립니다.</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* 기본 정보 */}
-          <h3 className={styles.sectionTitle}>기본 정보</h3>
+          <h2 className={styles.sectionTitle}>기본 정보</h2>
           <div className={styles.inputGroup}>
-            <label>이름 *</label>
+            <label htmlFor="name">이름 *</label>
 
             <input
               type="text"
+              id="name"
               name="name"
               value={form.name}
               onChange={handleChange}
@@ -142,10 +144,11 @@ export default function ConsultApplyPage() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label>생년월일 *</label>
+            <label htmlFor="birthDate">생년월일 *</label>
 
             <input
               type="date"
+              id="birthDate"
               name="birthDate"
               value={form.birthDate}
               onChange={handleChange}
@@ -153,10 +156,11 @@ export default function ConsultApplyPage() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label>연락처 *</label>
+            <label htmlFor="phone">연락처 *</label>
 
             <input
               type="text"
+              id="phone"
               name="phone"
               value={form.phone}
               onChange={handleChange}
@@ -165,10 +169,11 @@ export default function ConsultApplyPage() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label>이메일</label>
+            <label htmlFor="email">이메일</label>
 
             <input
               type="email"
+              id="email"
               name="email"
               value={form.email}
               onChange={handleChange}
@@ -177,11 +182,12 @@ export default function ConsultApplyPage() {
             />
           </div>
           {/* 상담 정보 */}
-          <h3 className={styles.sectionTitle}>상담 정보</h3>
+          <h2 className={styles.sectionTitle}>상담 정보</h2>
           <div className={styles.inputGroup}>
-            <label>관심 과정 *</label>
+            <label htmlFor="interestCourse">관심 과정 *</label>
 
             <select
+              id="interestCourse"
               name="interestCourse"
               value={form.interestCourse}
               onChange={handleChange}
@@ -216,10 +222,11 @@ export default function ConsultApplyPage() {
               ))}
             </select>
           </div>
-          <div className={styles.inputGroup}>
-            <label>상담 희망 내용 *</label>
+          <div className={`${styles.inputGroup} ${styles.full}`}>
+            <label htmlFor="content">상담 희망 내용 *</label>
 
             <textarea
+              id="content"
               name="content"
               value={form.content}
               onChange={handleChange}
@@ -228,10 +235,11 @@ export default function ConsultApplyPage() {
               placeholder="상담 내용을 입력하세요."
             />
           </div>
-          <div className={styles.inputGroup}>
-            <label>상담 희망 시간대 *</label>
+          <div className={`${styles.inputGroup} ${styles.full}`}>
+            <label htmlFor="preferredTime">상담 희망 시간대 *</label>
 
             <select
+              id="preferredTime"
               name="preferredTime"
               value={form.preferredTime}
               onChange={handleChange}
@@ -247,8 +255,8 @@ export default function ConsultApplyPage() {
             </select>
           </div>
           {/* 유입 경로 */}
-          <h3 className={styles.sectionTitle}>유입 경로</h3>
-          <div className={styles.radioGroup}>
+          <h2 className={styles.sectionTitle}>유입 경로</h2>
+          <div className={styles.radioGroup} role="group" aria-label="유입 경로">
             {codes.LEAD_SOURCE?.map((source: CommonCode) => (
               <label key={source.code} className={styles.radioItem}>
                 <input
@@ -264,13 +272,13 @@ export default function ConsultApplyPage() {
             ))}
           </div>
           {errorMessage && (
-            <div className={styles.errorBox}>{errorMessage}</div>
+            <div className={styles.errorBox} role="alert">{errorMessage}</div>
           )}
           <button type="submit" className={styles.applyButton}>
             상담 신청
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
