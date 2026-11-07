@@ -29,7 +29,7 @@ public class CustomerProfileService {
 
     @Transactional
     public void update(Long customerId, String email, UpdateCustomerProfileRequestDto request) {
-        var user = users.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        var user = users.findByEmailForWork(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         if (!"ROLE_CONSULTANT".equals(user.getRoles()) || !"ACTIVE".equals(user.getStatus())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }

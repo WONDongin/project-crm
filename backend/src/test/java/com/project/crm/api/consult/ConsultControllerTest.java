@@ -21,6 +21,7 @@ class ConsultControllerTest {
     @Autowired MockMvc mvc;
     @MockitoBean CustomerService service;
     @MockitoBean JwtUtil jwtUtil;
+    @MockitoBean com.project.crm.domain.user.UserRepository userRepository;
     private final String body = """
         {"name":"신청자","birthDate":"1997-12-28","phone":"010-1111-1111",
          "interestCourse":"JAVA","consultType":"PHONE","preferredTime":"PM",

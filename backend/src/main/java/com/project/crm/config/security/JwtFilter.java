@@ -1,5 +1,6 @@
 package com.project.crm.config.security;
 
+import com.project.crm.domain.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -18,6 +19,7 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository users;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -38,16 +40,19 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null && jwtUtil.validateToken(token)) {
 
             String email = jwtUtil.getEmail(token);
-            String role = jwtUtil.getRole(token);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            List.of(new SimpleGrantedAuthority(role))
-                    );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Long id = jwtUtil.getUserId(token);
+            Long version = jwtUtil.getAuthVersion(token);
+            // DB 오류는 인증 실패로 숨기지 않는다. 유효한 서명이어도 기존 토큰/폐기 버전은 거부한다.
+            var user = id == null ? null : users.findById(id).orElse(null);
+            if (user != null && version != null && version == user.getAuthVersion()
+                    && user.getEmail().equals(email) && "ACTIVE".equals(user.getStatus())
+                    && user.getRoles().equals(jwtUtil.getRole(token))) {
+                var authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null,
+                        List.of(new SimpleGrantedAuthority(user.getRoles())));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                SecurityContextHolder.clearContext();
+            }
         }
 
         filterChain.doFilter(request, response);

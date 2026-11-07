@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class ActivityLogService {
     private final ActivityLogRepository activityLogRepository;
+    private final com.project.crm.domain.user.UserRepository userRepository;
 
     // 상담 신청시  ACTIVITY_LOG 자동 생성
     public void createReceivedLog(
@@ -22,6 +23,10 @@ public class ActivityLogService {
             String content
     ) {
 
+        // 계정 변경과 FK 검사 사이의 잠금 역전을 피하도록 사용자 -> 고객 순서를 유지한다.
+        if (customer.getCounselor() != null) {
+            userRepository.findByIdForWork(customer.getCounselor().getUserId());
+        }
         ActivityLog activityLog = ActivityLog.builder()
                 .customer(customer)
                 .counselor(customer.getCounselor())

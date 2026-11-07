@@ -7,6 +7,7 @@ import axios from "axios";
 import type { Customer } from "@/types/customer";
 import {
   assignCustomerCounselor,
+  unassignCustomerCounselor,
   getAssignableCounselors,
   getCustomers,
 } from "@/lib/api/admin.api";
@@ -53,6 +54,7 @@ export default function AdminCustomersPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [savingCustomerId, setSavingCustomerId] = useState<number | null>(null);
+  const [releaseId, setReleaseId] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   // 빠르게 연속 클릭해도 요청이 중복되지 않도록 처리
@@ -96,6 +98,21 @@ export default function AdminCustomersPage() {
       cancelled = true;
     };
   }, []);
+
+  const handleUnassign = async (customer: Customer) => {
+    if (savingRef.current) return;
+    savingRef.current = true; setSavingCustomerId(customer.customerId);
+    try {
+      const response = await unassignCustomerCounselor(customer.customerId);
+      if (!response.success) throw new Error(response.message || "배정 해제 실패");
+      setCustomers(previous => previous.map(item => item.customerId === customer.customerId
+        ? { ...item, counselorId: null, counselorName: "미지정" } : item));
+      setChangedCounselors(previous => { const next = { ...previous }; delete next[customer.customerId]; return next; });
+      setReleaseId(null);
+      setFeedback({ type: "success", title: "배정 해제 완료", message: "고객 상태와 상담 기록은 유지하고 담당자만 해제했습니다." });
+    } catch (error) { setFeedback({ type: "error", title: "배정 해제 실패", message: getErrorMessage(error) }); }
+    finally { savingRef.current = false; setSavingCustomerId(null); }
+  };
 
   // 기존 담당자와 다른 상담사를 선택한 경우에만 변경사항 보관
   const handleCounselorChange = (customer: Customer, value: string) => {
@@ -331,6 +348,13 @@ export default function AdminCustomersPage() {
                       >
                         {isSaving ? "저장 중..." : "저장"}
                       </button>
+                      {customer.counselorId !== null && <div className={styles.unassignActions}>
+                        {releaseId === customer.customerId ? <div role="group" aria-label={`${customer.name} 배정 해제 확인`}>
+                          <p>담당자를 해제할까요? 고객 상태와 상담 기록은 유지합니다.</p>
+                          <button type="button" disabled={savingCustomerId !== null} onClick={() => void handleUnassign(customer)}>해제 확인</button>
+                          <button type="button" disabled={savingCustomerId !== null} onClick={() => setReleaseId(null)}>취소</button>
+                        </div> : <button type="button" disabled={savingCustomerId !== null} aria-label={`${customer.name} 배정 해제`} onClick={() => setReleaseId(customer.customerId)}>배정 해제</button>}
+                      </div>}
                     </td>
                   </tr>
                 );

@@ -25,6 +25,7 @@ class ConsultantAttachmentControllerTest {
     @Autowired MockMvc mvc;
     @MockitoBean FileService files;
     @MockitoBean JwtUtil jwtUtil;
+    @MockitoBean com.project.crm.domain.user.UserRepository userRepository;
     private UsernamePasswordAuthenticationToken login(String role) {
         return new UsernamePasswordAuthenticationToken("owner@example.com","unused",List.of(new SimpleGrantedAuthority(role)));
     }
@@ -46,7 +47,7 @@ class ConsultantAttachmentControllerTest {
                 .andExpect(status().isOk());verify(files).delete(1L,2L,3L,"owner@example.com");
     }
     @Test void blocksAnonymousAdminAndMissingFile() throws Exception {
-        mvc.perform(get("/consultant/customers/1/activities/2/attachments")).andExpect(status().isForbidden());
+        mvc.perform(get("/consultant/customers/1/activities/2/attachments")).andExpect(status().isUnauthorized());
         mvc.perform(get("/consultant/customers/1/activities/2/attachments").with(authentication(login("ROLE_ADMIN"))))
                 .andExpect(status().isForbidden());
         mvc.perform(multipart("/consultant/customers/1/activities/2/attachments").with(authentication(login("ROLE_CONSULTANT"))))

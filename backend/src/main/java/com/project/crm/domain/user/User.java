@@ -40,6 +40,12 @@ public class User {
     @Builder.Default
     private String status = "ACTIVE";
 
+    @Column(name = "auth_version", nullable = false)
+    @Builder.Default
+    private long authVersion = 0;
+
+    public void revokeTokens() { authVersion++; }
+
     @Column(name = "memo", columnDefinition = "TEXT")
     private String memo;
 

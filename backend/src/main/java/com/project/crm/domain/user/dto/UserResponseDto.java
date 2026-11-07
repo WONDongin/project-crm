@@ -16,8 +16,12 @@ public class UserResponseDto {
     private String specialty;
     private String status;
     private LocalDateTime lastLoginAt;
+    private String memo;
+    private long assignedCustomerCount;
 
-    public static UserResponseDto from(User user) {
+    public static UserResponseDto from(User user) { return from(user, 0); }
+
+    public static UserResponseDto from(User user, long assignedCustomerCount) {
         return new UserResponseDto(
                 user.getUserId(),
                 user.getName(),
@@ -25,7 +29,9 @@ public class UserResponseDto {
                 user.getRoles(),
                 user.getSpecialty(),
                 user.getStatus(),
-                user.getLastLoginAt()
+                user.getLastLoginAt(),
+                user.getMemo(),
+                assignedCustomerCount
         );
     }
 }
