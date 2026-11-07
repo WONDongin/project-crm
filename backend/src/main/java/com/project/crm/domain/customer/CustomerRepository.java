@@ -19,6 +19,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findByCustomerIdAndCounselor_UserId(Long customerId, Long counselorId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select customer from Customer customer where customer.customerId = :customerId")
+    Optional<Customer> findByIdForUpdate(@Param("customerId") Long customerId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         select customer
         from Customer customer
@@ -29,6 +33,15 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
         @Param("customerId") Long customerId,
         @Param("counselorId") Long counselorId
     );
+
+    @Query("""
+        select c from Customer c
+        where replace(replace(replace(replace(replace(replace(c.phone, '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), '+', '') = :phone
+          and (c.birthDate = :birthDate or (c.birthDate is null and :birthDate is null))
+          and c.customerId <> :excludedId
+        """)
+    List<Customer> findIdentityMatches(@Param("phone") String phone,
+            @Param("birthDate") LocalDate birthDate, @Param("excludedId") Long excludedId);
 
     // 상담신청_기존 고객 여부 판단
     Optional<Customer> findByPhoneAndBirthDate(

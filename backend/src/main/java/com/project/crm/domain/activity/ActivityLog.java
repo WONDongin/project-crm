@@ -23,8 +23,8 @@ public class ActivityLog {
     private Long activityId;
 
     // 고객
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
     // 상담사
@@ -34,7 +34,8 @@ public class ActivityLog {
 
     // 생성 주체
     @Column(name = "created_by", nullable = false, length = 20)
-    private String createdBy;
+    @Builder.Default
+    private String createdBy = "SYSTEM";
 
     // 상담 유형
     @Column(name = "consult_type", length = 20)
@@ -46,10 +47,11 @@ public class ActivityLog {
     
     // 상담 결과
     @Column(name = "activity_result", nullable = false, length = 20)
-    private String activityResult;
+    @Builder.Default
+    private String activityResult = "RECEIVED";
 
     // 상담 내용
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     // 다음 액션
@@ -60,8 +62,13 @@ public class ActivityLog {
     @Column(name = "file_upload_no")
     private Long fileUploadNo;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    void initializeCreatedAt() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
 
     @Column(name = "updated_at", insertable = false)
     private LocalDateTime updatedAt;

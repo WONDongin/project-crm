@@ -116,7 +116,7 @@ class ConsultantCustomerDetailIntegrationTest {
         log(customer, "SYSTEM", "COMPLETED", "시스템 처리", null);
         Customer anotherCustomer = entityManager.persistAndFlush(Customer.builder()
                 .name("다른 고객").phone("010-9999-9999").interestCourse("JAVA")
-                .leadSource("WEB").status("NEW").counselor(owner).build());
+                .birthDate(LocalDate.of(1998,1,1)).leadSource("WEB").status("NEW").counselor(owner).build());
         log(anotherCustomer, "SYSTEM", "RECEIVED", "다른 고객 신청", "AM");
         entityManager.clear();
 
@@ -144,7 +144,7 @@ class ConsultantCustomerDetailIntegrationTest {
         setReceivedAt(older, date.minusDays(1));
         Customer another = entityManager.persistAndFlush(Customer.builder()
                 .name("다른 고객").phone("010-0000-0000").interestCourse("JAVA")
-                .leadSource("WEB").status("NEW").counselor(owner).build());
+                .birthDate(LocalDate.of(1998,1,1)).leadSource("WEB").status("NEW").counselor(owner).build());
         log(another, "SYSTEM", "RECEIVED", "다른 고객 신청", "AM");
         entityManager.clear();
 
@@ -204,6 +204,25 @@ class ConsultantCustomerDetailIntegrationTest {
         assertHistoryForbidden(customer.getCustomerId(), other.getUserId());
     }
 
+
+    @Test
+    void historyEditableRequiresCurrentAuthorsConsultantRecord() {
+        var mine = log(customer, "CONSULTANT", "COMPLETED", "내 기록", null);
+        mine.setCounselor(owner);
+        var previous = log(customer, "CONSULTANT", "COMPLETED", "이전 담당자 기록", null);
+        previous.setCounselor(other);
+        var receipt = log(customer, "SYSTEM", "RECEIVED", "신청 원본", null);
+        receipt.setCounselor(owner);
+        emFlushAndClear();
+        var entries = detailService.getHistory(customer.getCustomerId(), owner.getUserId(), 0).content();
+        assertThat(entries).filteredOn(e -> e.activityId().equals(mine.getActivityId()))
+                .allMatch(e -> e.editable());
+        assertThat(entries).filteredOn(e -> !e.activityId().equals(mine.getActivityId()))
+                .noneMatch(e -> e.editable());
+    }
+
+    private void emFlushAndClear() { entityManager.flush(); entityManager.clear(); }
+
     private void assertHistoryForbidden(Long customerId, Long counselorId) {
         assertThatThrownBy(() -> detailService.getHistory(customerId, counselorId, 0))
                 .isInstanceOfSatisfying(ResponseStatusException.class,
@@ -212,7 +231,7 @@ class ConsultantCustomerDetailIntegrationTest {
 
     private User user(String email) {
         return entityManager.persistAndFlush(User.builder().email(email).password("test-hash")
-                .name(email).roles("ROLE_CONSULTANT").status("ACTIVE").build());
+                .name(email).roles("ROLE_CONSULTANT").specialty("BACKEND").status("ACTIVE").build());
     }
 
     private ActivityLog log(Customer target, String createdBy, String result, String content, String time) {

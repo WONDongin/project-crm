@@ -1,6 +1,10 @@
 package com.project.crm.api.consultant;
 
 import lombok.RequiredArgsConstructor;
+import com.project.crm.domain.activity.ConsultantActivityLogService;
+import com.project.crm.domain.activity.dto.CreateActivityLogRequestDto;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,9 +38,45 @@ import com.project.crm.domain.user.UserRepository;
 @RequestMapping("/consultant/customers")
 @RequiredArgsConstructor
 public class ConsultantCustomerController {
+    private final ConsultantActivityLogService activityLogService;
+    private final com.project.crm.domain.customer.CustomerProfileService profileService;
     private final CustomerService customerService;
     private final ConsultantCustomerDetailService customerDetailService;
     private final UserRepository userRepository;
+
+    @PostMapping("/{customerId}/activities")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<Long> createActivity(
+            @PathVariable Long customerId,
+            @Valid @RequestBody CreateActivityLogRequestDto request,
+            Authentication authentication
+    ) {
+        return ApiResponse.success(activityLogService.create(customerId, authentication.getName(), request),
+                "상담 기록이 등록되었습니다.");
+    }
+
+    @PatchMapping("/{customerId}/activities/{activityId}")
+    public ApiResponse<Void> updateActivity(
+            @PathVariable Long customerId,
+            @PathVariable Long activityId,
+            @Valid @RequestBody CreateActivityLogRequestDto request,
+            Authentication authentication
+    ) {
+        activityLogService.update(customerId, activityId, authentication.getName(), request);
+        return ApiResponse.success(null, "상담 기록이 수정되었습니다.");
+    }
+
+    @PatchMapping("/{customerId}/profile")
+    public ApiResponse<Void> updateProfile(@PathVariable Long customerId,
+            @Valid @RequestBody com.project.crm.domain.customer.dto.UpdateCustomerProfileRequestDto request,
+            Authentication authentication) {
+        try {
+            profileService.update(customerId, authentication.getName(), request);
+        } catch (org.springframework.dao.DataIntegrityViolationException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "중복 고객 정보 또는 입력값을 확인해 주세요.");
+        }
+        return ApiResponse.success(null, "고객 정보가 수정되었습니다.");
+    }
 
     // 신청 접수 원본과 상담 이력을 최신순으로 5건씩 조회
     @GetMapping("/{customerId}/activities")

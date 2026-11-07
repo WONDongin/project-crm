@@ -6,6 +6,8 @@ import { getConsCustomerHistory } from "@/lib/api/consultant.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
 import type { ActivityLogPage } from "@/types/activityLog";
+import ActivityAttachments from "./ActivityAttachments";
+import CreateActivityForm from "./CreateActivityForm";
 import styles from "./CustomerDetail.module.css";
 
 type HistoryState =
@@ -16,9 +18,10 @@ type HistoryState =
 const dateTime = (value: string | null) =>
   value ? value.slice(0, 16).replace("T", " ") : "-";
 
-export default function CustomerHistory({ customerId, onRestricted }: {
+export default function CustomerHistory({ customerId, onRestricted, onCreated }: {
   customerId: string;
   onRestricted: () => void;
+  onCreated: () => void;
 }) {
   const [page, setPage] = useState(0);
   const [attempt, setAttempt] = useState(0);
@@ -61,6 +64,9 @@ export default function CustomerHistory({ customerId, onRestricted }: {
         <h2 id="consultation-history">상담 기록</h2>
         <span>{data ? `전체 ${data.totalElements}건 · 최신순` : "최신순 · 5건씩 조회"}</span>
       </div>
+      <CreateActivityForm customerId={customerId} onRestricted={onRestricted} onCreated={() => {
+        setPage(0); setAttempt((value) => value + 1); onCreated();
+      }} />
       {state.status === "loading" ? (
         <div role="status" className={styles.applicationLoading}>
           <span>상담 기록을 불러오는 중입니다.</span>
@@ -100,8 +106,15 @@ export default function CustomerHistory({ customerId, onRestricted }: {
                     </dl>
                     <h4 className={styles.contentTitle}>{receipt ? "신청 내용" : "상담 내용"}</h4>
                     <p className={styles.content}>{record.content || "입력된 내용이 없습니다."}</p>
+                    {record.updatedAt && <p className={styles.contentTitle}>최근 갱신 {dateTime(record.updatedAt)}</p>}
+                    {record.editable && <CreateActivityForm key={`${record.activityId}-${attempt}`}
+                      customerId={customerId} record={record} onRestricted={onRestricted} onCreated={() => {
+                        setAttempt((value) => value + 1);
+                      }} />}
                     {record.nextAction && <><h4 className={styles.contentTitle}>다음 액션</h4>
                       <p className={styles.content}>{record.nextAction}</p></>}
+                    <ActivityAttachments customerId={customerId} activityId={record.activityId}
+                      editable={record.editable} onRestricted={onRestricted} />
                   </li>
                 );
               })}

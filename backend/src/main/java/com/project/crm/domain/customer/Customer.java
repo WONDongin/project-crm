@@ -14,7 +14,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "customers", uniqueConstraints = @UniqueConstraint(
+        name = "uk_customer_phone_birth", columnNames = {"phone", "birth_date"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,7 +34,7 @@ public class Customer {
     @Column(nullable = false, length = 20)
     private String phone;
 
-    @Column(name = "birth_date")
+    @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
     @Column(length = 100)
@@ -46,7 +47,8 @@ public class Customer {
     private String leadSource;
 
     @Column(nullable = false, length = 30)
-    private String status;
+    @Builder.Default
+    private String status = "NEW";
 
     @Column(name = "customer_tag", length = 50)
     private String customerTag;

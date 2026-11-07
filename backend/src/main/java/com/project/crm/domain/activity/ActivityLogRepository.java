@@ -11,6 +11,7 @@ import java.util.Optional;
 
 // 상담 기록 저장/조회
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
+    boolean existsByFileUploadNo(Long fileUploadNo);
 
     // 상담사 단건 연관만 함께 조회하여 서버 페이징을 유지
     @EntityGraph(attributePaths = "counselor")
@@ -18,6 +19,8 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> 
             Long customerId,
             Pageable pageable
     );
+
+    Optional<ActivityLog> findByActivityIdAndCustomer_CustomerId(Long activityId, Long customerId);
 
     // 일반 상담 기록을 제외하고 가장 최근 신청 접수 원본 한 건만 조회
     Optional<ActivityLog> findFirstByCustomer_CustomerIdAndCreatedByAndActivityResultOrderByCreatedAtDescActivityIdDesc(

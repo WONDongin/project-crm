@@ -67,3 +67,30 @@ export const getConsCustomerHistory = async (customerId, page = 0, signal) => {
   });
   return response.data;
 };
+
+export const createConsCustomerActivity = async (customerId, record) => {
+  const response = await api.post(`/consultant/customers/${customerId}/activities`, record);
+  return response.data;
+};
+
+export const updateConsCustomerActivity = async (customerId, activityId, record) => {
+  const response = await api.patch(`/consultant/customers/${customerId}/activities/${activityId}`, record);
+  return response.data;
+};
+
+export const updateConsCustomerProfile = async (customerId, profile) => {
+  const response = await api.patch(`/consultant/customers/${customerId}/profile`, profile);
+  return response.data;
+};
+const attachmentPath = (customerId, activityId) =>
+  `/consultant/customers/${customerId}/activities/${activityId}/attachments`;
+export const getConsAttachments = async (customerId, activityId, signal) =>
+  (await api.get(attachmentPath(customerId, activityId), { signal })).data;
+export const uploadConsAttachment = async (customerId, activityId, file) => {
+  const data = new FormData(); data.append("file", file);
+  return (await api.post(attachmentPath(customerId, activityId), data, { timeout: 60000 })).data;
+};
+export const downloadConsAttachment = async (customerId, activityId, fileId) =>
+  (await api.get(`${attachmentPath(customerId, activityId)}/${fileId}`, { responseType: "blob", timeout: 60000 })).data;
+export const deleteConsAttachment = async (customerId, activityId, fileId) =>
+  (await api.delete(`${attachmentPath(customerId, activityId)}/${fileId}`)).data;

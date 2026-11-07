@@ -25,7 +25,13 @@ public class ConsultController {
             @Valid @RequestBody ConsultApplyRequestDto request
     ) {
 
-        customerService.applyConsult(request);
+        try {
+            customerService.applyConsult(request);
+        } catch (org.springframework.dao.DataIntegrityViolationException exception) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT,
+                    "동일 고객의 신청이 처리되었거나 입력값이 충돌했습니다. 확인 후 다시 시도해 주세요.");
+        }
 
         return ResponseEntity.ok().build();
     }
