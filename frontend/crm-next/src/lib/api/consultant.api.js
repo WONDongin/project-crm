@@ -8,14 +8,9 @@ export const getConsCustomerDetail = async (customerId, signal) => {
 };
 
 // 상담사 대시보드_고객 목록 조회
-export const getConscustomers = async () => {
-  try {
-    const response = await api.get("/consultant/customers");
-    return response.data;
-  } catch (error) {
-    console.error("유저 목록 조회 에러:", error);
-    throw error;
-  }
+export const getConscustomers = async (params = {}, signal) => {
+  const response = await api.get("/consultant/customers", { params, signal });
+  return response.data;
 };
 
 // 상담사 담당 고객 상태 변경
@@ -48,16 +43,8 @@ export const updateConsCustomerTag = async (customerId, customerTag) => {
 
 // 상담사 담당 고객 상태 및 태그 변경
 export const updateConsCustomer = async (customerId, updates) => {
-  try {
-    const response = await api.patch(
-      `/consultant/customers/${customerId}`,
-      updates,
-    );
-    return response.data;
-  } catch (error) {
-    console.error("고객 정보 변경 에러:", error);
-    throw error;
-  }
+  const response = await api.patch(`/consultant/customers/${customerId}`, updates);
+  return response.data;
 };
 
 // 상담 신청 접수 및 상담 이력: 서버에서 5건씩 최신순 조회
@@ -94,3 +81,5 @@ export const downloadConsAttachment = async (customerId, activityId, fileId) =>
   (await api.get(`${attachmentPath(customerId, activityId)}/${fileId}`, { responseType: "blob", timeout: 60000 })).data;
 export const deleteConsAttachment = async (customerId, activityId, fileId) =>
   (await api.delete(`${attachmentPath(customerId, activityId)}/${fileId}`)).data;
+
+export const getConsDashboard = async (signal) => (await api.get("/consultant/dashboard", { signal })).data;

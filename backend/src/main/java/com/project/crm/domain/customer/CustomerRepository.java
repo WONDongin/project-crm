@@ -6,12 +6,31 @@ import java.util.Optional;
 
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 // 고객 리포지토리 (데이터베이스 접근)
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
+public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSpecificationExecutor<Customer> {
+    @Override
+    @EntityGraph(attributePaths = "counselor")
+    Page<Customer> findAll(
+            Specification<Customer> specification,
+            Pageable pageable);
+
+    interface StatusCount { String getStatus(); long getCustomerCount(); }
+    @Query("select c.status as status, count(c) as customerCount from Customer c where c.counselor.userId = :id group by c.status")
+    List<StatusCount> countStatusesForCounselor(@Param("id") Long id);
+
+    @EntityGraph(attributePaths = "counselor")
+    Page<Customer> findByCounselor_UserIdAndLastActivityAtIsNotNull(
+            Long id, Pageable pageable);
+
     interface AssignmentCount { Long getUserId(); long getCustomerCount(); }
     @Query("select c.counselor.userId as userId, count(c) as customerCount from Customer c where c.counselor is not null group by c.counselor.userId")
     List<AssignmentCount> countAssignments();

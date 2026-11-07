@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.project.crm.common.response.ApiResponse;
 import com.project.crm.domain.customer.AdminCustomerAssignmentService;
-import com.project.crm.domain.customer.CustomerService;
+import com.project.crm.domain.customer.CustomerBrowseService;
 import com.project.crm.domain.customer.dto.AssignCounselorRequestDto;
-import com.project.crm.domain.customer.dto.CustomerResponseDto;
+import com.project.crm.domain.customer.dto.CustomerPageResponseDto;
 import com.project.crm.domain.user.dto.UserResponseDto;
 
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,20 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin/customers")
 public class AdminCustomerController {
 
-    private final CustomerService customerService;
+    private final CustomerBrowseService browse;
     private final AdminCustomerAssignmentService assignmentService;
 
     // 전체 고객 목록 조회
     @GetMapping
-    public ApiResponse<List<CustomerResponseDto>> getCustomers() {
-        return ApiResponse.success(customerService.getCustomers());
+    public ApiResponse<CustomerPageResponseDto> getCustomers(
+            @RequestParam(defaultValue="") String keyword,
+            @RequestParam(defaultValue="") String status,
+            @RequestParam(defaultValue="") String interestCourse,
+            @RequestParam(required=false) Long counselorId,
+            @RequestParam(defaultValue="false") boolean unassigned,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size, Authentication authentication) {
+        return ApiResponse.success(browse.search(authentication.getName(),true,keyword,status,interestCourse,counselorId,unassigned,page,size));
     }
 
     // 배정 가능한 활성 상담사 목록 조회
