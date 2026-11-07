@@ -16,9 +16,15 @@ public class FileMeta {
     @Column(name = "file_save_nm", nullable = false, length = 255) private String savedName;
     @Column(name = "file_path", nullable = false, length = 255) private String filePath;
     @Column(name = "file_size", nullable = false) private long sizeBytes;
-    @Column(name = "del_yn", nullable = false, length = 1) private String delYn;
+    @Column(name = "del_yn", nullable = false, length = 1, columnDefinition = "CHAR(1)")
+    @Builder.Default private String delYn = "N";
     @Column(name = "created_at", nullable = false, updatable = false) private LocalDateTime uploadedAt;
     @Column(name = "updated_at") private LocalDateTime updatedAt;
+
+    @PrePersist
+    void initializeDefaults() {
+        if (uploadedAt == null) uploadedAt = LocalDateTime.now().withNano(0);
+    }
 
     public void markDeleted() {
         delYn = "Y";

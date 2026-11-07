@@ -42,7 +42,7 @@ class CustomerProfileAttachmentIntegrationTest {
                 .activityResult("COMPLETED").content("상담 원문").build());
         receipt=em.persistAndFlush(ActivityLog.builder().customer(customer).counselor(owner).createdBy("SYSTEM")
                 .activityResult("RECEIVED").content("신청 원문").build());
-        var code=new Code();code.setCodeGroup("INTEREST_COURSE");code.setCodeVal("SPRING");code.setUseYn("Y");em.persistAndFlush(code);
+        var code=new Code();code.setCodeGroup("INTEREST_COURSE");code.setCodeVal("SPRING");code.setCodeNm("스프링");code.setDepth(0);code.setCreatedAt(LocalDateTime.now().withNano(0));code.setUseYn("Y");em.persistAndFlush(code);
     }
     @Test void profileChangesOnlyAllowedFieldsAndPreservesApplication() {
         profiles.update(customer.getCustomerId(), owner.getEmail(), new UpdateCustomerProfileRequestDto("새 이름", "010 9876 5432", "SPRING"));
@@ -124,7 +124,7 @@ class CustomerProfileAttachmentIntegrationTest {
         assertThat(java.nio.file.Files.exists(directory.resolve(saved.getSavedName()))).isTrue();
     }
     private MockMultipartFile upload(){return new MockMultipartFile("file","상담.pdf","application/pdf",pdf);}
-    private User user(String email){return em.persistAndFlush(User.builder().email(email).password("hash").name(email).roles("ROLE_CONSULTANT").status("ACTIVE").build());}
+    private User user(String email){return em.persistAndFlush(User.builder().email(email).password("hash").name(email).roles("ROLE_CONSULTANT").specialty("BACKEND").status("ACTIVE").build());}
     private void assertStatus(int status, org.assertj.core.api.ThrowableAssert.ThrowingCallable action){
         assertThatThrownBy(action).isInstanceOfSatisfying(ResponseStatusException.class,e->assertThat(e.getStatusCode().value()).isEqualTo(status));
     }

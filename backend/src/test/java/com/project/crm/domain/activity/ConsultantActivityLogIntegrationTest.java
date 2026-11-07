@@ -31,7 +31,7 @@ class ConsultantActivityLogIntegrationTest {
     @BeforeEach void setup() {
         owner = user("owner@example.com"); other = user("other@example.com");
         customer = em.persistAndFlush(Customer.builder().name("김고객").phone("010-1234-5678")
-                .interestCourse("JAVA").leadSource("WEB").status("IN_PROGRESS").counselor(owner).build());
+                .birthDate(java.time.LocalDate.of(1997,12,28)).interestCourse("JAVA").leadSource("WEB").status("IN_PROGRESS").counselor(owner).build());
         code("CONSULT_TYPE", "PHONE", "Y"); code("ACTIVITY_RESULT", "COMPLETED", "Y");
         code("ACTIVITY_RESULT", "RECEIVED", "Y"); code("CONSULT_TYPE", "INACTIVE", "N");
     }
@@ -125,7 +125,7 @@ class ConsultantActivityLogIntegrationTest {
     @Test void rejectsMismatchedCustomerAndMissingRecord() {
         Long id = service.create(customer.getCustomerId(), owner.getEmail(), request);
         var another = em.persistAndFlush(Customer.builder().name("다른 고객").phone("010-9999-9999")
-                .interestCourse("JAVA").leadSource("WEB").status("IN_PROGRESS").counselor(owner).build());
+                .birthDate(java.time.LocalDate.of(1997,12,28)).interestCourse("JAVA").leadSource("WEB").status("IN_PROGRESS").counselor(owner).build());
         updateDenied(another.getCustomerId(), id, owner.getEmail(), 404);
         updateDenied(customer.getCustomerId(), Long.MAX_VALUE, owner.getEmail(), 404);
         customer.setCounselor(null); em.flush(); em.clear();
@@ -161,9 +161,9 @@ class ConsultantActivityLogIntegrationTest {
     }
     private User user(String email) {
         return em.persistAndFlush(User.builder().email(email).password("hash").name(email)
-                .roles("ROLE_CONSULTANT").status("ACTIVE").build());
+                .roles("ROLE_CONSULTANT").specialty("BACKEND").status("ACTIVE").build());
     }
     private void code(String group, String value, String active) {
-        Code c = new Code(); c.setCodeGroup(group); c.setCodeVal(value); c.setUseYn(active); em.persistAndFlush(c);
+        Code c = new Code(); c.setCodeGroup(group); c.setCodeVal(value); c.setCodeNm(value); c.setDepth(0); c.setUseYn(active); c.setCreatedAt(java.time.LocalDateTime.now().withNano(0)); em.persistAndFlush(c);
     }
 }

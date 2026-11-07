@@ -17,6 +17,9 @@ public class CustomerProfileService {
     private final CodeRepository codes;
 
     public static String normalizePhone(String value) {
+        if (value == null || !value.matches("[0-9() .+-]{9,20}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "연락처 형식을 확인해 주세요.");
+        }
         String digits = value.replaceAll("[^0-9]", "");
         if (!digits.matches("[0-9]{9,11}")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "연락처는 숫자 9~11자리로 입력해 주세요.");
