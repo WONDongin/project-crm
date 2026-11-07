@@ -6,7 +6,6 @@ import com.project.crm.domain.activity.dto.CreateActivityLogRequestDto;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.project.crm.domain.activity.dto.ActivityLogPageResponseDto;
 
@@ -24,7 +23,8 @@ import com.project.crm.common.response.ApiResponse;
 import com.project.crm.domain.customer.CustomerService;
 import com.project.crm.domain.customer.ConsultantCustomerDetailService;
 import com.project.crm.domain.customer.dto.ConsultantCustomerDetailResponseDto;
-import com.project.crm.domain.customer.dto.ConsultantCustomerResponseDto;
+import com.project.crm.domain.customer.CustomerBrowseService;
+import com.project.crm.domain.customer.dto.CustomerPageResponseDto;
 import com.project.crm.domain.customer.dto.UpdateConsultantCustomerRequestDto;
 import com.project.crm.domain.customer.dto.UpdateCustomerTagRequestDto;
 import com.project.crm.domain.customer.dto.UpdateCustomerStatusRequestDto;
@@ -41,6 +41,7 @@ public class ConsultantCustomerController {
     private final ConsultantActivityLogService activityLogService;
     private final com.project.crm.domain.customer.CustomerProfileService profileService;
     private final CustomerService customerService;
+    private final CustomerBrowseService browse;
     private final ConsultantCustomerDetailService customerDetailService;
     private final UserRepository userRepository;
 
@@ -111,20 +112,12 @@ public class ConsultantCustomerController {
 
     // 상담사별 고객 조회
     @GetMapping
-    public ApiResponse<List<ConsultantCustomerResponseDto>> getCustomers(
-            Authentication authentication
-    ) {
-
-        // JWT principal = email
-        String email = (String) authentication.getPrincipal();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return ApiResponse.success(
-                customerService.getConsultantCustomers(user.getUserId())
-        );
-
+    public ApiResponse<CustomerPageResponseDto> getCustomers(
+            @RequestParam(defaultValue="") String keyword, @RequestParam(defaultValue="") String status,
+            @RequestParam(defaultValue="") String interestCourse, @RequestParam(required=false) Long counselorId,
+            @RequestParam(defaultValue="false") boolean unassigned, @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size, Authentication authentication) {
+        return ApiResponse.success(browse.search(authentication.getName(),false,keyword,status,interestCourse,counselorId,unassigned,page,size));
     }
 
     // 담당 고객 상태 변경

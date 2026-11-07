@@ -402,3 +402,21 @@
   color: #9ca3af;
   cursor: not-allowed;
 }
+/* 운영 화면의 표는 내부에서 스크롤하고, 작은 화면에서는 메뉴를 위로 이동한다. */
+.main { min-width: 0; }
+@media (max-width: 900px) {
+  .layout { flex-direction: column; }
+  .sidebar { position: static; width: 100%; height: auto; padding: 18px 20px; }
+  .logo { margin-bottom: 12px; }
+  .userBox { flex-direction: row; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; }
+  .menuTitle { margin-bottom: 8px; }
+  .menuList { display: flex; flex-wrap: wrap; gap: 4px; }
+  .menuItem { margin: 0; }
+  .menuLink { padding: 10px 12px; }
+  .main { margin-left: 0; padding: 20px 16px; }
+}
+
+.unassignActions { margin-top: 8px; max-width: 240px; }
+.unassignActions p { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
+.unassignActions button { min-height: 44px; margin-right: 6px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; color: #111827; cursor: pointer; }
+.unassignActions button:disabled { opacity: .5; cursor: default; }

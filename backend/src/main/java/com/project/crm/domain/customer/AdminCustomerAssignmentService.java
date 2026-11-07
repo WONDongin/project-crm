@@ -25,30 +25,27 @@ public class AdminCustomerAssignmentService {
 
     // 배정 가능한 활성 상담사 목록 조회
     public List<UserResponseDto> getCounselors() {
+        var counts = customerRepository.countAssignments().stream().collect(java.util.stream.Collectors.toMap(
+                CustomerRepository.AssignmentCount::getUserId, CustomerRepository.AssignmentCount::getCustomerCount));
         return userRepository
                 .findByRolesAndStatusOrderByNameAscUserIdAsc(
                         "ROLE_CONSULTANT",
                         "ACTIVE"
                 )
                 .stream()
-                .map(UserResponseDto::from)
+                .map(user -> UserResponseDto.from(user, counts.getOrDefault(user.getUserId(), 0L)))
                 .toList();
     }
 
     // 고객 담당 상담사 배정 및 변경
     @Transactional
-    public void assignCounselor(Long customerId, Long counselorId) {
+    public void assignCounselor(Long customerId, Long counselorId, String actorEmail) {
+        var lockedUsers = userRepository.findAllForAdministration();
+        requireAdmin(lockedUsers, actorEmail);
+        User counselor = lockedUsers.stream().filter(u -> u.getUserId().equals(counselorId)).findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상담사를 찾을 수 없습니다."));
         Customer customer = customerRepository.findByIdForUpdate(customerId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "고객을 찾을 수 없습니다."
-                ));
-
-        User counselor = userRepository.findById(counselorId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "상담사를 찾을 수 없습니다."
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "고객을 찾을 수 없습니다."));
 
         // 요청값을 직접 변경해도 관리자 계정은 배정할 수 없음
         if (!"ROLE_CONSULTANT".equals(counselor.getRoles())) {
@@ -84,5 +81,18 @@ public class AdminCustomerAssignmentService {
         if ("NEW".equals(customer.getStatus())) {
             customer.setStatus("IN_PROGRESS");
         }
+    }
+
+    @Transactional
+    public void unassignCounselor(Long customerId, String actorEmail) {
+        requireAdmin(userRepository.findAllForAdministration(), actorEmail);
+        var customer = customerRepository.findByIdForUpdate(customerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "고객을 찾을 수 없습니다."));
+        customer.setCounselor(null);
+        // 상태·최근 상담일·과거 상담 기록은 유지한다.
+    }
+    private void requireAdmin(List<User> users, String email) {
+        if (users.stream().noneMatch(u -> u.getEmail().equals(email) && "ROLE_ADMIN".equals(u.getRoles()) && "ACTIVE".equals(u.getStatus())))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "활성 관리자만 담당자를 변경할 수 있습니다.");
     }
 }

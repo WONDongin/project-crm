@@ -1,0 +1,31 @@
+.dashboard { color: #111827; min-width: 0; }
+.header, .recentHeader { display: flex; gap: 20px; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.header h1 { font-size: 26px; margin: 0 0 8px; }
+.header p, .recentHeader p { color: #4b5563; margin: 0; line-height: 1.6; }
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.dashboard button, .primary { min-height: 44px; padding: 10px 14px; border: 1px solid #d1d5db; background: white; color: #111827; border-radius: 6px; font: inherit; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; white-space: nowrap; }
+.dashboard button:disabled { opacity: .5; cursor: default; }
+.dashboard a { color: #111827; text-underline-offset: 4px; }
+.dashboard a.primary { background: #111827; color: white; border-color: #111827; }
+.dashboard :focus-visible { outline: 2px solid #111827; outline-offset: 3px; }
+.overview { background: white; border: 1px solid #e5e7eb; border-radius: 10px; display: grid; grid-template-columns: 190px minmax(0,1fr); margin-bottom: 28px; overflow: hidden; }
+.total { background: #f9fafb; padding: 24px; }
+.total h2 { margin: 0 0 16px; font-size: 15px; font-weight: 500; }
+.total strong { font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.overview small { font-size: 14px; margin-left: 5px; font-weight: 400; }
+.statuses { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); }
+.statusCell { display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 24px 18px; text-decoration: none; }
+.statusCell span { color: #4b5563; font-size: 14px; }
+.statusCell strong { font-size: 24px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.statusCell:hover { background: #f9fafb; }
+.recent { background: white; border-radius: 10px; padding: 24px; }
+.recentHeader h2 { margin: 0 0 8px; font-size: 20px; }
+.recentHeader p { font-size: 14px; }
+.recentHeader a { white-space: nowrap; font-size: 14px; }
+.scroll { overflow-x: auto; }
+.recent table { width: 100%; min-width: 750px; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+.recent td, .recent th { padding: 15px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+.recent th { font-weight: 500; color: #4b5563; white-space: nowrap; }
+.recent th:first-child, .recent td:first-child { position: sticky; left: 0; background: white; z-index: 1; min-width: 100px; }
+.empty { color: #4b5563; padding: 20px 0; }
+@media (max-width: 700px) { .header, .recentHeader { flex-wrap: wrap; } .header h1 { font-size: 23px; } .overview { grid-template-columns: minmax(0,1fr); } .total { padding: 20px; } .statuses { grid-template-columns: repeat(2,minmax(0,1fr)); } .statusCell { padding: 20px; } .recent { padding: 18px; } }

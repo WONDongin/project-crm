@@ -26,7 +26,7 @@ public class JwtUtil {
     }
 
     // JWT 생성
-    public String generateToken(String email, String role, String name) {
+    public String generateToken(String email, String role, String name, Long userId, long authVersion) {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpiration);
@@ -35,6 +35,8 @@ public class JwtUtil {
                 .setSubject(email)
                 .claim("role", role)
                 .claim("name", name)
+                .claim("uid", userId)
+                .claim("ver", authVersion)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -67,6 +69,16 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public Long getUserId(String token) {
+        Number value = getClaims(token).get("uid", Number.class);
+        return value == null ? null : value.longValue();
+    }
+
+    public Long getAuthVersion(String token) {
+        Number value = getClaims(token).get("ver", Number.class);
+        return value == null ? null : value.longValue();
     }
 
     // 이름 추출

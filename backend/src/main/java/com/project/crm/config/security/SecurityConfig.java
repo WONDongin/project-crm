@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final com.project.crm.domain.user.UserRepository users;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,6 +28,11 @@ public class SecurityConfig {
                                 SessionCreationPolicy.STATELESS
                         )
                 )
+                .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, exception) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"success\":false,\"message\":\"로그인이 필요합니다.\"}");
+                }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**","/common-codes/**","/consult/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -34,7 +40,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
-                        new JwtFilter(jwtUtil),
+                        new JwtFilter(jwtUtil, users),
                         UsernamePasswordAuthenticationFilter.class
                 );
 
