@@ -1,109 +1,64 @@
-.detail {
-  --detail-ink: #111827;
-  --detail-muted: #596273;
-  --detail-line: #e5e7eb;
-  --detail-surface: #ffffff;
-  --detail-subtle: #f3f4f6;
-  color: var(--detail-ink);
-  min-width: 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--detail-muted);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin: 12px 0 24px;
-}
-
-.header h1 { margin: 0; font-size: 24px; font-weight: 700; overflow-wrap: anywhere; }
-.header p { margin: 4px 0 0; color: var(--detail-muted); }
-.status { padding: 4px 10px; border-radius: 6px; background: #e5e7eb; white-space: nowrap; }
-
-/* 두 영역의 폭 합계와 24px 간격이 전체 콘텐츠 폭을 채운다. */
+/* A안: 고객 정보와 신청 요약 2열, 상담 기록은 전체 폭을 사용한다. */
+.detail { --detail-ink: var(--crm-ink); --detail-muted: var(--crm-muted); --detail-line: var(--crm-line); --detail-surface: #fff; --detail-subtle: #f2f6fc; color: var(--detail-ink); min-width: 0; font-size: 15px; line-height: 1.6; }
+.backLink { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; color: var(--crm-action); text-decoration: none; font-size: 14px; }
+.backLink:hover { text-decoration: underline; text-underline-offset: 4px; }
+.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 8px 0 28px; }
+.header h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.header p { margin: 6px 0 0; color: var(--detail-muted); }
+.status { padding: 6px 12px; border-radius: 8px; background: #e8f1ff; color: var(--crm-action); font-size: 14px; font-weight: 500; white-space: nowrap; }
 .sections { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
-.section { min-width: 0; padding: 24px; background: var(--detail-surface); border: 1px solid var(--detail-line); border-radius: 16px; }
-.section h2 { margin: 0 0 20px; font-size: 16px; font-weight: 600; }
-.fields, .applicationFields { margin: 0; display: grid; gap: 16px; }
-.fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.section { min-width: 0; padding: 28px; background: var(--detail-surface); border-radius: 16px; }
+.section h2 { margin: 0 0 24px; font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.fields, .applicationFields { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px 24px; }
 .field { min-width: 0; }
-.field dt { color: var(--detail-muted); margin-bottom: 4px; font-size: 13px; }
+.field dt { color: var(--detail-muted); margin-bottom: 6px; font-size: 13px; }
 .field dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
-.applicationFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .contentTitle { font-size: 13px; font-weight: 400; color: var(--detail-muted); margin: 24px 0 8px; }
-.content { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.empty, .message { margin: 0; padding: 16px; border-radius: 8px; background: var(--detail-subtle); }
+.content { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
+.empty, .message { margin: 16px 0 0; padding: 20px; border-radius: 10px; background: var(--detail-subtle); }
 .message p { margin: 0; }
-.retryButton { min-height: 44px; margin-top: 12px; padding: 8px 16px; color: white; background: var(--detail-ink); border: 0; border-radius: 8px; cursor: pointer; }
-.backLink:hover { color: var(--detail-ink); }
-.retryButton:hover { background: #374151; }
-.backLink:focus-visible, .retryButton:focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 4px; }
+.detail button { font: inherit; min-height: 44px; padding: 10px 16px; border: 0; border-radius: 8px; background: #f2f4f6; color: var(--detail-ink); cursor: pointer; }
+.detail button:hover:not(:disabled) { background: #e5e8eb; }
+.detail .retryButton { margin-top: 16px; color: white; background: var(--crm-action); font-weight: 500; }
+.detail .retryButton:hover:not(:disabled) { background: #1454bc; }
+.detail button:disabled { opacity: .6; cursor: default; }
+.detail :focus-visible { outline: 3px solid var(--crm-action); outline-offset: 3px; }
 .loading { grid-column: 1 / -1; margin: 0; color: var(--detail-muted); }
-.skeleton { display: block; width: 75%; height: 22px; background: var(--detail-subtle); border-radius: 4px; }
+.skeleton { display: block; width: 75%; height: 22px; background: #f2f4f6; border-radius: 4px; }
 .applicationLoading { display: grid; gap: 24px; }
-
-@media (max-width: 1100px) {
-  .sections { grid-template-columns: minmax(0, 1fr); }
-}
-
-@media (max-width: 480px) {
-  .section { padding: 20px; }
-  .fields, .applicationFields { grid-template-columns: minmax(0, 1fr); }
-}
-
 .history { grid-column: 1 / -1; }
 .historyHeading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; }
 .historyHeading h2, .historyHeading h3 { margin: 0; }
-.historyHeading h3 { font-size: 15px; font-weight: 600; }
-.historyHeading > span, .historyHeading time { color: var(--detail-muted); font-size: 13px; }
-.historyList { list-style: none; margin: 16px 0 0; padding: 0; }
-.historyEntry { padding: 20px 0; border-top: 1px solid var(--detail-line); }
-.historyFields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 16px 0 0; }
-.historyPagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
-.historyPagination button { min-height: 44px; padding: 8px 16px; background: var(--detail-surface); color: var(--detail-ink); border: 1px solid var(--detail-line); border-radius: 8px; cursor: pointer; }
-.historyPagination button:disabled { color: var(--detail-muted); background: var(--detail-subtle); cursor: default; }
-.historyPagination button:focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 4px; }
-@media (max-width: 768px) {
-  .historyFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 480px) {
-  .historyFields { grid-template-columns: minmax(0, 1fr); }
-}
-
-.composer { margin: 16px 0; }
-.composer h3 { margin: 0 0 16px; font-size: 15px; }
-.formFields { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.formFields label { display: grid; gap: 6px; min-width: 0; }
-.formFields label span { color: var(--detail-muted); font-size: 12px; }
-.formFields input, .formFields select, .formFields textarea { width: 100%; min-height: 44px; padding: 10px; border: 1px solid #9ca3af; border-radius: 6px; background: white; color: var(--detail-ink); font: inherit; }
+.historyHeading h3 { font-size: 16px; font-weight: 500; }
+.historyHeading > span, .historyHeading time { color: var(--detail-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.historyList { list-style: none; margin: 24px 0 0; padding: 0; }
+.historyEntry { padding: 28px 0; border-top: 1px solid var(--detail-line); }
+.historyEntry:last-child { padding-bottom: 0; }
+.historyFields { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 20px; margin: 20px 0 0; }
+.historyPagination { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+.historyPagination span { font-size: 14px; color: var(--crm-action); background: #edf4ff; padding: 10px 16px; border-radius: 8px; font-variant-numeric: tabular-nums; }
+.composer { margin: 20px 0 0; }
+.composer h3 { margin: 0 0 20px; font-size: 16px; font-weight: 500; }
+.composer form { padding: 24px; border-radius: 12px; background: #f8faff; }
+.composer > .retryButton { margin-top: 0; }
+.formFields { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+.formFields label { display: grid; gap: 8px; min-width: 0; font-size: 14px; }
+.formFields label span { color: var(--detail-muted); font-size: 13px; }
+.formFields input, .formFields select, .formFields textarea { width: 100%; min-width: 0; min-height: 46px; padding: 10px 12px; border: 1px solid #c7cdd4; border-radius: 8px; background: white; color: var(--detail-ink); font: inherit; }
 .formFields textarea { resize: vertical; }
 .fullField, .formActions { grid-column: 1 / -1; }
 .formActions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.formActions button { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .formActions .retryButton { margin: 0; }
-.formActions button:disabled { opacity: .6; cursor: default; }
-.formFields :focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 3px; }
-@media (max-width: 480px) { .formFields { grid-template-columns: minmax(0, 1fr); } }
-
+.formFields [role="alert"] { color: #b42318; }
 .attachments { margin-top: 20px; }
-.attachmentButton { min-height: 44px; padding: 8px 12px; border: 1px solid var(--detail-line); border-radius: 6px; background: white; color: var(--detail-ink); cursor: pointer; }
 .attachmentList { list-style: none; margin: 16px 0; padding: 0; }
 .attachmentList li { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--detail-line); }
 .fileName { overflow-wrap: anywhere; min-width: 0; }
 .fileName small { color: var(--detail-muted); }
 .uploadLabel { display: grid; gap: 8px; margin-top: 16px; }
-.uploadLabel input { max-width: 100%; min-height: 44px; }
-.attachments button:disabled { opacity: .6; cursor: default; }
-.attachments button:focus-visible { outline: 2px solid var(--detail-ink); outline-offset: 3px; }
+.uploadLabel input { max-width: 100%; min-height: 44px; font-size: 14px; }
+.uploadLabel input::file-selector-button { border: 0; border-radius: 8px; background: #edf4ff; color: var(--crm-action); padding: 10px 14px; margin-right: 12px; cursor: pointer; font: inherit; }
+@media (max-width: 1100px) { .sections { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 768px) { .historyFields { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 640px) { .header { margin-bottom: 20px; } .header h1 { font-size: 26px; } .header p { font-size: 14px; } .sections { gap: 20px; } .section { padding: 20px 16px; border-radius: 12px; } .section h2 { font-size: 19px; margin-bottom: 20px; } .historyHeading h2 { margin: 0; } .composer form { padding: 20px 14px; } .historyPagination { justify-content: space-between; gap: 8px; } .historyPagination span { padding: 10px; } }
+@media (max-width: 480px) { .fields, .applicationFields, .historyFields, .formFields { grid-template-columns: minmax(0,1fr); } .historyEntry { padding: 24px 0; } }

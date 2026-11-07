@@ -26,7 +26,11 @@ export default function UserEditModal({ mode, user, currentUserId, onClose, onSa
   // 카운트가 오래됐더라도 상담사의 자격 해제는 담당 고객 전체에 적용됨을 확인한다.
   const changesEligibility = mode === "edit" && user?.roles === "ROLE_CONSULTANT" && user.status === "ACTIVE" && (draft.roles !== "ROLE_CONSULTANT" || draft.status !== "ACTIVE");
   const title = mode === "create" ? "계정 생성" : mode === "password" ? "비밀번호 초기화" : "계정 수정";
-  useEffect(() => { element.current?.showModal(); }, []);
+  useEffect(() => {
+    const dialog = element.current;
+    dialog?.showModal();
+    dialog?.querySelector<HTMLInputElement>("input:not(:disabled)")?.focus();
+  }, []);
   function field(key: keyof AccountDraft, value: string) { setDraft(previous => ({ ...previous, [key]: value })); setAcknowledged(false); }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (busy.current) return;

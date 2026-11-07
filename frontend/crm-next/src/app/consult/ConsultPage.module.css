@@ -1,215 +1,38 @@
-/* ConsultPage.module.css */
-
-.applyPage {
-  min-height: 100vh;
-  background: #f5f7fa;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
-}
-
-.applyCard {
-  width: 100%;
-  max-width: 720px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
-.logoBox {
-  text-align: center;
-  margin-bottom: 36px;
-}
-
-.logo {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 16px;
-  border-radius: 50%;
-  background: #111827;
-  color: #fff;
-  font-size: 24px;
-  font-weight: 700;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.title {
-  font-size: 30px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.desc {
-  margin-top: 8px;
-  color: #6b7280;
-  font-size: 15px;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-}
-
-.sectionTitle {
-  margin: 28px 0 18px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.inputGroup {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 18px;
-}
-
-.inputGroup label {
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.input,
-.select,
-.textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: 0.2s;
-  outline: none;
-  background: #fff;
-}
-
-.input:focus,
-.select:focus,
-.textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.textarea {
-  resize: vertical;
-  min-height: 140px;
-}
-
-.radioGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin-bottom: 20px;
-}
-
-.radioItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.radioItem input {
-  cursor: pointer;
-}
-
-.errorBox {
-  margin-top: 8px;
-  margin-bottom: 16px;
-  padding: 12px;
-  border-radius: 8px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-  font-size: 14px;
-}
-
-.successBox {
-  margin-top: 8px;
-  margin-bottom: 16px;
-  padding: 12px;
-  border-radius: 8px;
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-  font-size: 14px;
-}
-
-.applyButton {
-  width: 100%;
-  height: 50px;
-  margin-top: 12px;
-  border: none;
-  border-radius: 8px;
-  background: #111827;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.applyButton:hover {
-  background: #1f2937;
-}
-
-.applyButton:active {
-  transform: scale(0.99);
-}
-
-/* complete */
-.completeCard {
-  width: 100%;
-  max-width: 520px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 60px 40px;
-  border-radius: 16px;
-  background-color: #ffffff;
-  text-align: center;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-}
-
-.completeIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 24px;
-  border-radius: 50%;
-  background-color: #eef7ff;
-  font-size: 36px;
-  font-weight: 700;
-}
-
-.completeTitle {
-  margin-bottom: 16px;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.completeDescription {
-  margin-bottom: 32px;
-  line-height: 1.7;
-  color: #666666;
-}
-
-.completeButton {
-  display: inline-block;
-  padding: 14px 24px;
-  border-radius: 8px;
-  background-color: #222222;
-  color: #ffffff;
-  text-decoration: none;
-  font-weight: 600;
-}
+.publicRoot { min-height: 100dvh; }
+.applyPage { max-width: 960px; margin: auto; padding: 48px 24px 64px; }
+.applyCard { width: 100%; background: #fff; border-radius: 16px; padding: 40px 48px; }
+.logoBox { margin-bottom: 32px; }
+.brand { display: inline-flex; align-items: center; min-height: 44px; font-size: 24px; font-weight: 700; letter-spacing: -1px; color: var(--crm-ink); text-decoration: none; margin-bottom: 28px; }
+.brand span { color: var(--crm-blue); margin-left: 3px; }
+.title { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -.035em; color: var(--crm-ink); }
+.desc { margin: 12px 0 0; color: var(--crm-muted); font-size: 15px; line-height: 1.8; }
+/* 두 개의 입력 열과 24px 간격으로 신청 정보를 정렬한다. */
+.form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.sectionTitle { grid-column: 1 / -1; margin: 16px 0 0; padding-top: 28px; border-top: 1px solid var(--crm-line); font-size: 20px; font-weight: 700; color: var(--crm-ink); }
+.sectionTitle:first-child { padding-top: 0; border: 0; margin-top: 0; }
+.inputGroup { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+.inputGroup label { font-size: 14px; font-weight: 500; color: var(--crm-ink); }
+.input, .select, .textarea { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid #c7cdd4; border-radius: 8px; background: #fff; color: var(--crm-ink); font: inherit; font-size: 15px; }
+.input::placeholder, .textarea::placeholder { color: #697586; }
+.input:hover, .select:hover, .textarea:hover { border-color: #9ca6b3; }
+.input:focus, .select:focus, .textarea:focus { border-color: var(--crm-action); }
+.textarea { resize: vertical; min-height: 140px; }
+.full { grid-column: 1 / -1; }
+.radioGroup { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; }
+.radioItem { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 16px; background: #f2f4f6; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.radioItem:has(input:checked) { background: #edf4ff; color: var(--crm-action); }
+.radioItem input { width: 18px; height: 18px; accent-color: var(--crm-action); cursor: pointer; }
+.errorBox, .successBox { grid-column: 1 / -1; padding: 16px; border-radius: 8px; font-size: 14px; line-height: 1.7; }
+.errorBox { background: #fff1f0; color: #b42318; }
+.successBox { background: #edf4ff; color: var(--crm-action); }
+.applyButton { grid-column: 1 / -1; width: 100%; min-height: 52px; margin-top: 8px; border: 0; border-radius: 8px; background: var(--crm-action); color: #fff; font: inherit; font-weight: 500; cursor: pointer; }
+.applyButton:hover { background: #1454bc; }
+.applyButton:disabled { opacity: .6; cursor: default; }
+.container { min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px; }
+.completeCard { width: 100%; max-width: 560px; padding: 48px 32px; border-radius: 16px; background: #fff; text-align: center; }
+.completeIcon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 24px; border-radius: 50%; background: #edf4ff; color: var(--crm-action); font-size: 30px; }
+.completeTitle { margin: 0 0 16px; font-size: 26px; font-weight: 700; letter-spacing: -.03em; text-wrap: balance; }
+.completeDescription { margin: 0 0 32px; line-height: 1.8; color: var(--crm-muted); }
+.completeButton { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border-radius: 8px; background: var(--crm-action); color: #fff; text-decoration: none; font-size: 14px; }
+.completeButton:hover { background: #1454bc; }
+@media (max-width: 640px) { .applyPage { padding: 24px 16px 40px; } .applyCard { padding: 28px 20px; border-radius: 12px; } .brand { font-size: 23px; margin-bottom: 24px; } .title { font-size: 28px; } .desc { font-size: 14px; } .form { grid-template-columns: minmax(0,1fr); gap: 20px; } .sectionTitle { margin-top: 8px; padding-top: 24px; font-size: 19px; } .radioGroup { gap: 8px; } .completeCard { padding: 36px 20px; } .completeTitle { font-size: 23px; } }
