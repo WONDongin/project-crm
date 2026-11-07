@@ -1,0 +1,4 @@
+.theme { --crm-blue: #3182f6; --crm-action: #1b64da; --crm-ink: #191f28; --crm-muted: #596579; --crm-ground: #f2f4f6; --crm-line: #e5e8eb; font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--crm-ink); background: var(--crm-ground); color-scheme: light; font-size: 15px; line-height: 1.5; }
+.theme *, .theme *::before, .theme *::after { box-sizing: border-box; }
+.theme button, .theme input, .theme select { font: inherit; }
+.theme :focus-visible { outline: 3px solid var(--crm-action); outline-offset: 3px; }

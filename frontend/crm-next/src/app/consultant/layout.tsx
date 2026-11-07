@@ -4,6 +4,8 @@ import LogoutButton from "@/components/auth/LogoutButton";
 import { getCurrentUser } from "@/lib/server/auth";
 import CodeInitializer from "@/components/common/CodeInitializer";
 import Link from "next/link";
+import ConsultantNav from "@/components/consultant/ConsultantNav";
+import theme from "@/styles/CrmTheme.module.css";
 import styles from "./ConsultantLayout.module.css";
 export default async function layout({
   children,
@@ -22,36 +24,20 @@ export default async function layout({
   }
 
   return (
-    <div className={styles.layout}>
+    <div className={`${theme.theme} ${styles.layout}`}>
       <CodeInitializer />
 
-      <aside className={styles.sidebar}>
-        <div className={styles.logo}>Consultant</div>
-
-        <div className={styles.userBox}>
-          <span className={styles.userName}>{user.name} 상담사 님</span>
-
-          <LogoutButton />
+      <a className={styles.skipLink} href="#main-content">본문으로 이동</a>
+      <header className={styles.topbar}>
+        <div className={styles.topbarInner}>
+          <Link href="/consultant/dashboard" className={styles.brand} aria-label="DIHS CRM 메인">DIHS<span>CRM</span></Link>
+          <span className={styles.product}>교육 상담 관리</span>
+          <ConsultantNav />
+          <div className={styles.account}><span>{user.name} · 상담사</span><LogoutButton /></div>
         </div>
+      </header>
 
-        <h3 className={styles.menuTitle}>상담사 메뉴</h3>
-
-        <ul className={styles.menuList}>
-          <li className={styles.menuItem}>
-            <Link href="/consultant/dashboard" className={styles.menuLink}>
-              메인
-            </Link>
-          </li>
-
-          <li className={styles.menuItem}>
-            <Link href="/consultant/customers" className={styles.menuLink}>
-              고객 관리
-            </Link>
-          </li>
-        </ul>
-      </aside>
-
-      <main className={styles.main}>{children}</main>
+      <main id="main-content" className={styles.main}>{children}</main>
     </div>
   );
 }
