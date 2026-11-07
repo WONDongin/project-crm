@@ -40,8 +40,25 @@ class ConsultantCustomerDetailControllerTest {
     @MockitoBean ConsultantCustomerDetailService detailService;
     @MockitoBean UserRepository userRepository;
     @MockitoBean JwtUtil jwtUtil;
+    @MockitoBean com.project.crm.domain.customer.CustomerBrowseService browse;
 
 
+
+    @Test
+    void pagedListBindsFiltersAndUsesAuthenticatedIdentity() throws Exception {
+        given(browse.search("owner@example.com", false, "010", "ACTIVE", "JAVA", null, false, 1, 10))
+                .willReturn(new com.project.crm.domain.customer.dto.CustomerPageResponseDto(List.of(), 1, 10, 11, 2));
+        mockMvc.perform(get("/consultant/customers").with(authentication(login("ROLE_CONSULTANT")))
+                .param("keyword", "010").param("status", "ACTIVE").param("interestCourse", "JAVA").param("page", "1"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.number").value(1))
+                .andExpect(jsonPath("$.data.totalElements").value(11));
+        verify(browse).search("owner@example.com", false, "010", "ACTIVE", "JAVA", null, false, 1, 10);
+        mockMvc.perform(get("/consultant/customers")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/consultant/customers").with(authentication(login("ROLE_ADMIN"))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/consultant/customers").with(authentication(login("ROLE_CONSULTANT"))).param("page", "abc"))
+                .andExpect(status().isBadRequest());
+    }
 
     @Test void profileUsesLoginAndValidatesRequest() throws Exception {
         var request = new com.project.crm.domain.customer.dto.UpdateCustomerProfileRequestDto("새 이름", "010-9876-5432", "JAVA");

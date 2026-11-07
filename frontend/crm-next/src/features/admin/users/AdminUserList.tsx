@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isCancel } from "axios";
 import { getUsers } from "@/lib/api/admin.api";
 import useCodeStore from "@/stores/codeStore";
 import { getCodeName } from "@/utils/codeUtil";
@@ -21,7 +22,10 @@ export default function AdminUserList({ currentUserId }: { currentUserId: number
     getUsers(controller.signal).then(response => {
       if (!response.success) throw new Error("조회 실패");
       if (!controller.signal.aborted) { setUsers(response.data); setError(""); }
-    }).catch(() => { if (!controller.signal.aborted) setError("사용자 목록을 불러오지 못했습니다. 다시 조회해 주세요."); })
+    }).catch(cause => {
+      if (controller.signal.aborted || isCancel(cause)) return;
+      setError("사용자 목록을 불러오지 못했습니다. 다시 조회해 주세요.");
+    })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [attempt]);

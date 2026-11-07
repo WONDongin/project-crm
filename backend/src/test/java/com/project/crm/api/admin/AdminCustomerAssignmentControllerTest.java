@@ -24,6 +24,7 @@ class AdminCustomerAssignmentControllerTest {
     @MockitoBean AdminCustomerAssignmentService assignments;
     @MockitoBean UserRepository users;
     @MockitoBean JwtUtil jwtUtil;
+    @MockitoBean com.project.crm.domain.customer.CustomerBrowseService browse;
     private UsernamePasswordAuthenticationToken login(String role) { return new UsernamePasswordAuthenticationToken("admin@example.com",null,List.of(new SimpleGrantedAuthority(role))); }
     @Test void explicitDeleteRequiresAdminAndUsesAuthenticatedActor() throws Exception {
         mvc.perform(delete("/admin/customers/10/counselor")).andExpect(status().isUnauthorized());
