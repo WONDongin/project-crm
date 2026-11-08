@@ -82,8 +82,59 @@ class AdminUserManagementIntegrationTest {
         assertStatus(403,()->service.resetPassword(consultant.getUserId(),admin.getEmail(),"resetpass123!"));
     }
     @Test void listIncludesCurrentAssignedCustomerCount() {
-        assertThat(service.list()).filteredOn(u->u.getUserId().equals(consultant.getUserId()))
+        assertThat(service.list(admin.getEmail(), "", "", "", 0, 10).content()).filteredOn(u->u.getUserId().equals(consultant.getUserId()))
                 .extracting(u->u.getAssignedCustomerCount()).containsExactly(1L);
+    }
+    @Test void pagesUsersOnServerWithStableNewestFirstOrderAndAssignmentCounts() {
+        var newest = replacement;
+        for (int i = 0; i < 20; i++) newest = user("person" + i + "@example.com", "ROLE_CONSULTANT");
+        var first = service.list(admin.getEmail(), "", "", "", 0, 10);
+        var last = service.list(admin.getEmail(), "", "", "", 2, 10);
+        assertThat(first.totalElements()).isEqualTo(23);
+        assertThat(first.totalPages()).isEqualTo(3);
+        assertThat(first.content()).hasSize(10);
+        assertThat(first.content().get(0).getUserId()).isEqualTo(newest.getUserId());
+        assertThat(last.content()).extracting(u -> u.getUserId()).containsExactly(
+                replacement.getUserId(), consultant.getUserId(), admin.getUserId());
+        assertThat(last.content()).filteredOn(u -> u.getUserId().equals(consultant.getUserId()))
+                .extracting(u -> u.getAssignedCustomerCount()).containsExactly(1L);
+        assertThat(first.content()).allMatch(u -> u.getAssignedCustomerCount() == 0);
+    }
+    @Test void combinesNameOrEmailWithRoleAndStatusAndIgnoresCaseAndOuterWhitespace() {
+        consultant.setName("김상담"); consultant.setStatus("INACTIVE"); em.flush();
+        var byName = service.list(admin.getEmail(), "  김상담  ", " ROLE_CONSULTANT ", "INACTIVE", 0, 10);
+        assertThat(byName.content()).extracting(u -> u.getUserId()).containsExactly(consultant.getUserId());
+        assertThat(service.list(admin.getEmail(), "CONSULTANT@EXAMPLE", "ROLE_CONSULTANT", "", 0, 10).totalElements()).isEqualTo(1);
+        assertThat(service.list(admin.getEmail(), "김상담", "ROLE_ADMIN", "", 0, 10).totalElements()).isZero();
+        assertThat(service.list(admin.getEmail(), "김상담", "", "ACTIVE", 0, 10).totalElements()).isZero();
+    }
+    @Test void treatsSqlWildcardsAsLiteralSearchTextAndReturnsEmptyPagesSafely() {
+        consultant.setName("상담%_!기호"); em.flush();
+        assertThat(service.list(admin.getEmail(), "%_!", "", "", 0, 10).content())
+                .extracting(u -> u.getUserId()).containsExactly(consultant.getUserId());
+        var absent = service.list(admin.getEmail(), "없는사용자", "", "", 0, 10);
+        assertThat(absent.content()).isEmpty(); assertThat(absent.totalPages()).isZero();
+        var beyond = service.list(admin.getEmail(), "", "", "", 20, 10);
+        assertThat(beyond.content()).isEmpty(); assertThat(beyond.totalElements()).isEqualTo(3);
+    }
+    @Test void updatedAccountFallsOutOfCurrentFilterAndTotalsAreRecomputed() {
+        assertThat(service.list(admin.getEmail(), "", "ROLE_CONSULTANT", "ACTIVE", 0, 10).totalElements()).isEqualTo(2);
+        service.update(consultant.getUserId(), admin.getEmail(), update("ROLE_CONSULTANT", "INACTIVE"));
+        var active = service.list(admin.getEmail(), "", "ROLE_CONSULTANT", "ACTIVE", 0, 10);
+        assertThat(active.totalElements()).isEqualTo(1);
+        assertThat(active.content()).extracting(u -> u.getUserId()).containsExactly(replacement.getUserId());
+    }
+    @Test void validatesSearchBoundsAndRequiresAnActiveAdmin() {
+        for (int[] range : new int[][]{{-1,10},{0,0},{0,101},{Integer.MAX_VALUE,100}}) {
+            assertStatus(400, () -> service.list(admin.getEmail(), "", "", "", range[0], range[1]));
+        }
+        assertStatus(400, () -> service.list(admin.getEmail(), "a".repeat(101), "", "", 0, 10));
+        assertStatus(400, () -> service.list(admin.getEmail(), "", "a".repeat(21), "", 0, 10));
+        assertStatus(400, () -> service.list(admin.getEmail(), "", "", "a".repeat(21), 0, 10));
+        assertStatus(403, () -> service.list(consultant.getEmail(), "", "", "", 0, 10));
+        assertStatus(401, () -> service.list("missing@example.com", "", "", "", 0, 10));
+        admin.setStatus("INACTIVE"); em.flush();
+        assertStatus(403, () -> service.list(admin.getEmail(), "", "", "", 0, 10));
     }
     private AdminUserRequestDto.Update update(String role,String status) {
         return new AdminUserRequestDto.Update(consultant.getEmail(),"상담사",role,"BACKEND",status,"메모");

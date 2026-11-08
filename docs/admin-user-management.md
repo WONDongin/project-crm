@@ -11,7 +11,7 @@
 
 | 요청 | 동작 |
 |---|---|
-| GET /admin/users | 계정 목록·메모·현재 담당 고객 수 |
+| GET /admin/users | 이름·이메일 검색, 역할·상태 필터, 서버 페이징·메모·현재 담당 고객 수 |
 | POST /admin/users | 이메일·이름·비밀번호·역할·전공·상태·메모로 계정 생성 |
 | PATCH /admin/users/{id} | 이메일·이름·역할·전공·상태·메모 수정 |
 | POST /admin/users/{id}/password | 지정한 새 비밀번호로 초기화 |
@@ -61,3 +61,7 @@
 - 1440/768/390px 화면 확인, 가로 넘침과 브라우저 런타임 오류 없음.
 - 백엔드 통합/MVC/JWT 필터/서명 테스트 추가: 암호화·중복·상태/역할 변경 후 미배정 전환·원본 보존·초기화·재활성화 후 예전 버전 거부·접근 역할·인증 ID/버전 claim 등을 포함한다.
 - Gradle 배포본 다운로드가 Network is unreachable로 실패하여 새 백엔드 테스트를 실행하지 못했다. 새 기능의 MySQL 연동·동시 요청과 이전 기능 회귀 확인은 추가 실행 검증이 필요하다.
+
+## 사용자 목록 검색·페이징 추가
+
+`GET /admin/users`의 data는 배열에서 페이지 객체(content/number/size/totalElements/totalPages)로 변경했다. 상세 조건과 화면 동작은 [admin-user-search.md](admin-user-search.md)를 참고한다.

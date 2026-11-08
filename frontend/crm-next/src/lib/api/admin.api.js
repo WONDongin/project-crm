@@ -2,8 +2,8 @@
 import api from "./axios";
 
 // 관리자 대시보드_사용자 관리
-export const getUsers = async (signal) => {
-  const response = await api.get("/admin/users", { signal });
+export const getUsers = async (params = {}, signal) => {
+  const response = await api.get("/admin/users", { params, signal });
   return response.data;
 };
 

@@ -49,6 +49,22 @@ class AdminUserControllerTest {
                 .andExpect(status().isOk());verify(service).resetPassword(5L,"admin@example.com","resetpass123!");
     }
 
+    @Test void bindsSearchParametersAndReturnsPagedSafeAccountData() throws Exception {
+        var row = UserResponseDto.from(User.builder().userId(5L).name("김상담").email("kim@example.com")
+                .roles("ROLE_CONSULTANT").specialty("BACKEND").status("ACTIVE").build(), 3);
+        when(service.list("admin@example.com", "김", "ROLE_CONSULTANT", "ACTIVE", 1, 10))
+                .thenReturn(new UserPageResponseDto(List.of(row), 1, 10, 11, 2));
+        mvc.perform(get("/admin/users").with(authentication(login("ROLE_ADMIN")))
+                .param("keyword", "김").param("roles", "ROLE_CONSULTANT").param("status", "ACTIVE").param("page", "1"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(11))
+                .andExpect(jsonPath("$.data.number").value(1)).andExpect(jsonPath("$.data.content[0].assignedCustomerCount").value(3))
+                .andExpect(jsonPath("$.data.content[0].password").doesNotExist())
+                .andExpect(jsonPath("$.data.content[0].authVersion").doesNotExist());
+        verify(service).list("admin@example.com", "김", "ROLE_CONSULTANT", "ACTIVE", 1, 10);
+        mvc.perform(get("/admin/users").with(authentication(login("ROLE_ADMIN"))).param("page", "abc"))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test void cookieAuthenticationRejectsRevokedVersionOnProtectedEndpoint() throws Exception {
         when(jwtUtil.validateToken("signed")).thenReturn(true);
         when(jwtUtil.getEmail("signed")).thenReturn("admin@example.com");
@@ -57,7 +73,7 @@ class AdminUserControllerTest {
         when(jwtUtil.getRole("signed")).thenReturn("ROLE_ADMIN");
         var user=User.builder().userId(1L).email("admin@example.com").roles("ROLE_ADMIN").status("ACTIVE").authVersion(2L).build();
         when(users.findById(1L)).thenReturn(java.util.Optional.of(user));
-        when(service.list()).thenReturn(List.of());
+        when(service.list("admin@example.com", "", "", "", 0, 10)).thenReturn(new UserPageResponseDto(List.of(),0,10,0,0));
         mvc.perform(get("/admin/users").cookie(new jakarta.servlet.http.Cookie("accessToken","signed"))).andExpect(status().isOk());
         user.setAuthVersion(3L);
         mvc.perform(get("/admin/users").cookie(new jakarta.servlet.http.Cookie("accessToken","signed"))).andExpect(status().isUnauthorized());
