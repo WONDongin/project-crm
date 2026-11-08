@@ -5,6 +5,21 @@
 교육 상담 신청부터 담당자 배정, 상담 이력과 수강 전환 상태까지 관리하는 웹 애플리케이션입니다.  
 **고객 정보와 상담 이력을 분리하고, 관리자·상담사의 역할 및 담당 고객 기준으로 접근을 제어했습니다.**
 
+## 서비스 구조
+
+```mermaid
+flowchart TD
+    UI["Next.js 화면"] -->|"상담 신청"| Public["공개 상담 API"]
+    UI -->|"HttpOnly Cookie"| Auth["JWT 인증 · 역할 검증"]
+    Auth --> Admin["관리자 API"]
+    Auth --> Consultant["상담사 API"]
+    Public --> Service["서비스 · 트랜잭션"]
+    Admin --> Service
+    Consultant --> Service
+    Service --> JPA["Spring Data JPA"]
+    JPA --> DB[("MySQL")]
+```
+
 ## 주요 기능
 
 | 사용자 | 기능 |
@@ -13,9 +28,24 @@
 | 상담사 | 담당 고객 검색·필터·페이징, 고객 정보·상태·태그 수정, 상담 기록 등록·수정, 첨부파일 관리 |
 | 관리자 | 담당 상담사 배정·변경·해제, 계정 생성·수정·비밀번호 초기화, 고객 현황 대시보드 |
 
-- 신규 고객은 `NEW`로 등록하고, 담당자 배정 시 `IN_PROGRESS`로 전환합니다.
 - 상담 기록은 최신순으로 5건씩 조회하며, **본인이 작성한 기록만 수정**할 수 있습니다.
 - 첨부파일은 접근 권한과 확장자·파일 내용·용량을 검증합니다.
+
+## 상담 처리 흐름
+
+```mermaid
+flowchart TD
+    Apply["상담 신청"] --> Check{"기존 고객인가?"}
+    Check -->|"신규"| New["고객 생성 · NEW"]
+    Check -->|"기존"| Existing["기존 고객 연결"]
+    New --> Log["신청 이력 저장"]
+    Existing --> Log
+    Log --> Assign["관리자 담당자 배정"]
+    Assign --> Consult["상담사 상담 기록 누적"]
+    Consult --> Status["고객 상태 관리 · 수강 전환"]
+```
+
+신규 고객은 담당자 배정 시 `IN_PROGRESS`로 전환하고, 기존 고객의 상태는 유지합니다.
 
 ## 핵심 설계
 
