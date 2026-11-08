@@ -33,3 +33,5 @@ export const createAdminUser = async (draft) => (await api.post('/admin/users', 
 export const updateAdminUser = async (id, draft) => (await api.patch(`/admin/users/${id}`, draft)).data;
 export const resetAdminUserPassword = async (id, password) => (await api.post(`/admin/users/${id}/password`, { password })).data;
 export const unassignCustomerCounselor = async (id) => (await api.delete(`/admin/customers/${id}/counselor`)).data;
+
+export const getAdminDashboard = async (signal) => (await api.get("/admin/dashboard", { signal })).data;

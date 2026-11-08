@@ -1,0 +1,49 @@
+.dashboard { color: var(--crm-ink); min-width: 0; }
+.header,.actions,.sectionHeader { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.header { margin-bottom:28px; }
+.header h1 { margin:0 0 6px; font-size:30px; letter-spacing:-.035em; }
+.header p,.sectionHeader p { margin:0; color:var(--crm-muted); line-height:1.7; }
+.actions { flex-wrap:wrap; justify-content:flex-start; }
+.actions span,.sectionHeader>span,.footnote { color:var(--crm-muted); font-size:12px; }
+.dashboard button,.primary { min-height:44px; padding:11px 16px; border:0; border-radius:8px; background:#e9edf2; color:var(--crm-ink); font:inherit; cursor:pointer; }
+.dashboard button:disabled { opacity:.55; cursor:default; }
+.dashboard a { color:var(--crm-action); text-decoration:none; }
+.dashboard a:hover { text-decoration:underline; }
+a.primary { background:var(--crm-action); color:white; display:inline-flex; align-items:center; }
+a.primary:hover { background:#1454bc; text-decoration:none; }
+.metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); background:white; border-radius:16px; padding:24px 0; margin-bottom:24px; }
+.metric { padding:0 28px; border-right:1px solid var(--crm-line); }
+.metric:last-child { border:0; }
+.metric h2 { margin:0 0 16px; font-size:14px; color:var(--crm-muted); font-weight:500; }
+.value { font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; min-height:48px; }
+.value small,.statuses small { font-size:13px; margin-left:5px; font-weight:500; }
+.metric p { font-size:12px; color:var(--crm-muted); margin:8px 0; }
+.metric a { font-size:13px; display:inline-block; padding:5px 0; }
+.missing { font-size:16px; color:var(--crm-muted); }
+.skeleton { display:inline-block; width:72px; height:30px; background:#e9edf2; border-radius:4px; }
+.columns { display:grid; grid-template-columns:minmax(240px,1fr) minmax(0,2fr); gap:24px; align-items:start; }
+.panel { background:white; padding:28px; border-radius:16px; min-width:0; }
+.sectionHeader { align-items:baseline; margin-bottom:22px; }
+.sectionHeader h2 { font-size:19px; margin:0; letter-spacing:-.025em; }
+.sectionHeader p { font-size:12px; margin-top:8px; }
+.sectionHeader a { font-size:13px; white-space:nowrap; }
+.statuses { list-style:none; padding:0; margin:0; }
+.statuses li+li { margin-top:20px; }
+.statuses a { display:grid; grid-template-columns:1fr auto; gap:8px; color:var(--crm-ink); font-size:14px; }
+.statuses strong { font-weight:500; font-variant-numeric:tabular-nums; }
+.track { grid-column:1/-1; height:6px; border-radius:3px; background:#edf0f3; overflow:hidden; }
+.track>span { display:block; height:100%; background:var(--crm-blue); }
+.tableScroll { overflow-x:auto; }
+.panel table { border-collapse:collapse; width:100%; font-size:13px; }
+.panel th { color:var(--crm-muted); font-weight:500; text-align:left; }
+.panel th,.panel td { padding:14px 10px; border-bottom:1px solid #edf0f3; }
+.panel th:first-child,.panel td:first-child { padding-left:0; }
+.panel td { white-space:nowrap; }
+.panel td strong { font-weight:700; }
+.panel td span { display:block; color:var(--crm-muted); font-size:12px; margin-top:5px; }
+.empty { color:var(--crm-muted); font-size:14px; padding:20px 0; line-height:1.7; }
+.notice { display:flex; align-items:center; justify-content:space-between; gap:16px; background:white; border:1px solid #e2b9b9; border-radius:8px; padding:16px; margin-bottom:20px; }
+.notice p { margin:0; }
+.footnote { margin:18px 0 0; }
+@media(max-width:1100px) { .header { flex-wrap:wrap; } .metric { padding:0 20px; } .columns { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:640px) { .header h1 { font-size:24px; } .header p { font-size:14px; } .actions { gap:8px; } .actions span { width:100%; } .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); padding:8px; } .metric { padding:18px 12px; border:0; } .metric h2 { margin-bottom:8px; } .metric p { min-height:36px; } .value { font-size:28px; } .panel { padding:20px 16px; } .sectionHeader { flex-wrap:wrap; gap:8px; } .sectionHeader h2 { font-size:18px; } .notice { flex-wrap:wrap; } .panel table { min-width:470px; } }
