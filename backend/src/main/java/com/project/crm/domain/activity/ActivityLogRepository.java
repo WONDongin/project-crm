@@ -11,6 +11,9 @@ import java.util.Optional;
 
 // 상담 기록 저장/조회
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
+    long countByCreatedByAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(
+            String createdBy, java.time.LocalDateTime start, java.time.LocalDateTime end);
+
     boolean existsByFileUploadNo(Long fileUploadNo);
 
     // 상담사 단건 연관만 함께 조회하여 서버 페이징을 유지

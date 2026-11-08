@@ -23,6 +23,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
             Specification<Customer> specification,
             Pageable pageable);
 
+    long countByCounselorIsNull();
+
+    @EntityGraph(attributePaths = "counselor")
+    Page<Customer> findByCounselorIsNull(Pageable pageable);
+
+    @Query("select c.status as status, count(c) as customerCount from Customer c group by c.status")
+    List<StatusCount> countAllStatuses();
+
     interface StatusCount { String getStatus(); long getCustomerCount(); }
     @Query("select c.status as status, count(c) as customerCount from Customer c where c.counselor.userId = :id group by c.status")
     List<StatusCount> countStatusesForCounselor(@Param("id") Long id);
@@ -34,6 +42,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
     interface AssignmentCount { Long getUserId(); long getCustomerCount(); }
     @Query("select c.counselor.userId as userId, count(c) as customerCount from Customer c where c.counselor is not null group by c.counselor.userId")
     List<AssignmentCount> countAssignments();
+
+    @Query("select c.counselor.userId as userId, count(c) as customerCount from Customer c where c.counselor.userId in :ids group by c.counselor.userId")
+    List<AssignmentCount> countAssignmentsForUsers(@Param("ids") List<Long> ids);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Customer c where c.counselor.userId = :userId order by c.customerId")
