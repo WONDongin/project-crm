@@ -1,5 +1,4 @@
-# DIHS CRM 
-[![CRM CI](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml/badge.svg)](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml)
+# Education Consulting CRM (교육 상담 고객 관리 시스템) [![CRM CI](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml/badge.svg)](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml)
 
 교육 상담 신청부터 담당자 배정, 상담 이력과 수강 전환 상태까지 관리하는 웹 애플리케이션입니다.  
 **고객 정보와 상담 이력을 분리하고, 관리자·상담사의 역할 및 담당 고객 기준으로 접근을 제어했습니다.**
