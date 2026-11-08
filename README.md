@@ -1,229 +1,69 @@
-## ⭐ Education Consulting CRM (교육 상담 고객 관리 시스템)
+# Education Consulting CRM
 
-<br>
+[![CRM CI](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml/badge.svg)](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml)
 
-### 소개 (Overview)
+교육 상담 신청부터 담당자 배정, 상담 이력과 수강 전환 상태까지 관리하는 웹 애플리케이션입니다.  
+**고객 정보와 상담 이력을 분리하고, 관리자·상담사의 역할 및 담당 고객 기준으로 접근을 제어했습니다.**
 
-> 교육 상담 신청부터 고객 배정, 상담 진행 및 수강 전환까지의 과정을 효율적으로 관리하기 위한  
-> **운영형 CRM(Customer Relationship Management) 웹 애플리케이션**입니다.
->
-> - 비회원 상담 신청 → 담당 상담사 배정 → 상담 진행까지 전 과정 관리
-> - 고객(Customer)과 상담 기록(Activity Log)을 분리한 이력 중심 설계
-> - 관리자 / 상담사 **Role 기반 기능 및 접근 권한 분리**
-> - 공통 코드 기반의 고객 상태, 상담 유형 및 처리 결과 관리
-> - 실무 CRM의 데이터 흐름과 운영 방식을 고려한 백엔드 중심 프로젝트
+## 주요 기능
 
-<br>
+| 사용자 | 기능 |
+| --- | --- |
+| 비회원 | 상담 신청, 전화번호·생년월일 기준 기존 고객 식별, 신청 이력 누적 |
+| 상담사 | 담당 고객 검색·필터·페이징, 고객 정보·상태·태그 수정, 상담 기록 등록·수정, 첨부파일 관리 |
+| 관리자 | 담당 상담사 배정·변경·해제, 계정 생성·수정·비밀번호 초기화, 고객 현황 대시보드 |
 
-## ⚙️ 주요 기능 (Features)
+- 신규 고객은 `NEW`로 등록하고, 담당자 배정 시 `IN_PROGRESS`로 전환합니다.
+- 상담 기록은 최신순으로 5건씩 조회하며, **본인이 작성한 기록만 수정**할 수 있습니다.
+- 첨부파일은 접근 권한과 확장자·파일 내용·용량을 검증합니다.
 
-- 고객 (External User)
-  - 로그인 없이 상담 신청
-  - 이름, 연락처, 생년월일, 관심 과정 및 희망 상담 시간 입력
-  - 전화번호 + 생년월일 기준 기존 고객 여부 확인
-  - 신규 고객 자동 생성 및 `NEW` 상태 등록
-  - 상담 신청 완료 페이지 제공
-  - 상담 신청 시 `ActivityLog` 자동 생성
-  - 상담 접수 상태(`RECEIVED`) 자동 저장
+## 핵심 설계
 
-- 상담사 (CONSULTANT)
-  - 로그인한 상담사 기준 담당 고객 목록 조회
-  - 담당 고객의 현재 상태 및 기본 정보 확인
-  - 고객 상태 변경  
-    (`NEW` / `IN_PROGRESS` / `ACTIVE` / `DORMANT` / `WITHDRAWN`)
-  - 상담 기록 등록 및 조회
-  - 상담 유형, 상담 결과 및 상담 내용 관리
-  - 본인 담당 고객만 접근할 수 있도록 서버 권한 검증
+### 고객과 상담 이력 분리
 
-- 관리자 (ADMIN)
-  - 상담사 / 관리자 계정 생성 및 관리
-  - 사용자 권한 및 계정 상태 제어
-  - 전체 고객 목록 조회
-  - 신규 및 미지정 고객 확인
-  - 고객 담당 상담사 배정 및 변경
-  - 담당자 배정 완료 시 고객 상태를 `IN_PROGRESS`로 변경
-  - 고객별 희망 상담 시간 및 상담 신청 정보 확인
-  - 전체 운영 현황 대시보드 조회
+`Customer`는 현재 고객 정보·상태·담당자를, `ActivityLog`는 신청 접수와 상담 이력을 관리합니다. 기존 고객이 다시 신청하면 고객을 새로 만들지 않고 이력을 추가하며, 고객 생성과 신청 이력 저장을 하나의 트랜잭션으로 처리합니다.
 
-- 인증 & 권한
-  - 이메일(ID) + 비밀번호 로그인
-  - JWT 기반 인증 및 `HttpOnly Cookie` 저장
-  - Role 기반 접근 제어 (`ADMIN` / `CONSULTANT`)
-  - 관리자·상담사 API 접근 권한 분리
-  - 비활성 계정 로그인 차단
-  - 프론트엔드 + 백엔드 이중 권한 검증
+### 담당자 변경을 고려한 권한 검증
 
-<br>
+역할 확인에 더해 서버에서 현재 담당 고객인지 검증합니다. 상담 기록 수정 시 작성자도 확인하고, `SYSTEM` 신청 원본은 수정할 수 없도록 했습니다. 담당자 배정과 상담 기록 변경에는 고객 행의 **비관적 잠금**을 사용해 권한 확인과 저장 사이의 담당자 변경을 제어합니다.
 
-### ⚙️ 기술 스택 (Tech Stack)
+### 계정 변경 시 기존 인증 무효화
+
+JWT를 HttpOnly Cookie로 전달하고, 요청마다 계정 활성 상태·역할·인증 버전을 확인합니다. 비밀번호 초기화나 이메일·역할·상태 변경 시 인증 버전을 갱신해 기존 토큰을 거부합니다.
+
+### 서버 페이징과 연관 데이터 조회
+
+고객 목록과 상담 이력에 서버 페이징을 적용했습니다. `@EntityGraph`로 담당 상담사 정보를 함께 조회해 행마다 상담사를 추가 조회하는 N+1 문제를 방지하고, 대시보드 현황은 집계 쿼리로 조회합니다.
+
+**구현 코드:** [상담 신청](backend/src/main/java/com/project/crm/domain/customer/CustomerService.java) · [상담 기록·권한 검증](backend/src/main/java/com/project/crm/domain/activity/ConsultantActivityLogService.java) · [JWT 검증](backend/src/main/java/com/project/crm/config/security/JwtFilter.java) · [고객 조회](backend/src/main/java/com/project/crm/domain/customer/CustomerRepository.java)
+
+## 기술 스택
 
 | 구분 | 기술 |
 | --- | --- |
-| Frontend | Next.js (App Router), React, TypeScript, Axios, CSS Module |
-| Backend | Java 17, Spring Boot 3, Spring Data JPA, Gradle |
-| Auth | Spring Security, JWT, HttpOnly Cookie |
-| Database | MySQL 8 |
-| Architecture | Layered Architecture, REST API |
-| State / Code | 공통 코드 기반 상태 관리, CodeInitializer |
-| Collaboration | GitHub, Notion |
+| Backend | Java 17, Spring Boot 3, Spring Data JPA, Spring Security, JWT, Gradle |
+| Frontend | Next.js 16 (App Router), React, TypeScript, Axios, Zustand, CSS Modules |
+| Database | MySQL 8 / 테스트: H2 |
+| Test · CI | JUnit 5, MockMvc, Mockito, GitHub Actions |
 
-<br>
+## 테스트 및 CI
 
-### 📂 프로젝트 구조 (Project Structure)
+- **백엔드 자동 테스트 104개 통과** — 상담 신청·중복 검증, 담당자 권한, 상담 기록 수정, 첨부파일, 계정 관리 등
+- `dev`·`main` 대상 PR에서 백엔드 테스트·빌드와 프론트 린트·타입 검사·빌드를 자동 실행
+- [테스트 코드](backend/src/test/java/com/project/crm) · [CI 실행 결과](https://github.com/WONDongin/project-crm/actions/workflows/ci.yml)
 
-```bash
-/backend
- ├── domain
- │   ├── user          # 관리자 / 상담사 계정 및 권한
- │   ├── customer      # 고객 정보 및 고객 상태
- │   ├── activity      # 상담 신청 및 상담 기록
- │   └── code          # 공통 코드 관리
- ├── api
- │   ├── auth          # 로그인 / 인증 API
- │   ├── consult       # 비회원 상담 신청 API
- │   ├── admin         # 관리자 전용 API
- │   └── consultant    # 상담사 전용 API
- └── config
-     ├── security      # Spring Security / JWT 설정
-     └── jpa           # JPA 설정
+<details>
+<summary>로컬 검사 명령</summary>
 
-/frontend
- ├── app
- │   ├── login         # 로그인 페이지
- │   ├── consult       # 상담 신청 / 완료 페이지
- │   ├── admin         # 관리자 페이지
- │   └── consultant    # 상담사 페이지
- ├── components        # 공통 UI 컴포넌트
- ├── store             # 인증 및 공통 코드 상태 관리
- ├── lib/api           # Axios 공통 API 레이어
- └── styles            # 공통 스타일 / CSS Module
-```
-
-<br>
-
-### 📐 전체 아키텍처 (Architecture)
-
-```text
-[Client - Next.js]
-        ↓ REST API / Axios
-[Spring Boot Application]
- ├── Auth API
- ├── Public Consult API
- ├── Admin API
- ├── Consultant API
- ├── Domain Service
- └── Spring Security + JWT
-        ↓
-[Spring Data JPA]
-        ↓
-[MySQL 8]
-```
-
-<br>
-
-### 🧠 핵심 도메인 설계 (Core Logic)
-
-#### 1. 고객 & 상담 기록 구조
-
-- `CUSTOMER`
-  - 고객의 기본 정보, 현재 상태 및 담당 상담사 관리
-- `ACTIVITY_LOG`
-  - 상담 신청과 고객 관련 상담 이력을 누적 관리
-- 고객의 현재 상태와 과거 상담 이력을 분리하여 데이터 변경 이력 보존
-
-```text
-비회원 상담 신청
-  ↓
-전화번호 + 생년월일로 기존 고객 확인
-  ↓
-신규 고객일 경우 CUSTOMER 생성 (NEW)
-  ↓
-ACTIVITY_LOG 자동 생성 (RECEIVED)
-  ↓
-관리자가 담당 상담사 배정
-  ↓
-고객 상태 변경 (IN_PROGRESS)
-  ↓
-상담사가 상담 기록 누적
-```
-
-<br>
-
-#### 2. 상담사 권한 흐름
-
-- 로그인한 상담사 기준 담당 고객 조회
-- 다른 상담사가 담당하는 고객은 접근 및 수정 불가
-- 프론트엔드 경로 제어와 백엔드 API 권한 검증을 함께 적용
-- 고객 상태 변경 및 상담 기록 등록 시 서버에서 담당자 권한 재검증
-
-```text
-상담사 로그인
-  ↓
-JWT 인증 및 CONSULTANT 권한 확인
-  ↓
-본인 담당 고객 조회
-  ↓
-고객 상태 변경
-  ↓
-상담 기록 등록 및 이력 누적
-```
-
-<br>
-
-#### 3. 관리자 운영 흐름
-
-- 신규 상담 고객을 관리자가 확인한 후 담당 상담사를 직접 배정
-- 담당 상담사 변경 시 고객과 상담사의 연관 관계 갱신
-- 담당자 배정이 완료되면 고객 상태를 상담 진행 중으로 변경
-- 사용자 계정, 고객 상태 및 전체 상담 현황을 통합 관리
-
-```text
-관리자 로그인
-  ↓
-전체 고객 / 사용자 조회
-  ↓
-NEW 상태의 미지정 고객 확인
-  ↓
-담당 상담사 배정
-  ↓
-고객 상태 IN_PROGRESS 변경
-  ↓
-상담 진행 현황 관리
-```
-
-<br>
-
-### 🚀 개발 및 협업 방식
-
-- GitHub 기반 소스 코드 관리
-- 기능별 브랜치 생성 및 PR 단위 병합
-- `main`, `dev` 브랜치 보호 및 직접 Push 제한
-- PR + 코드 리뷰 기반 협업
-  - 브랜치 전략  
-    `feature/*` → `dev` → `main`
-- 프론트엔드와 백엔드를 기능 단위로 함께 구현
-- API 요청 및 응답 구조를 DTO로 분리
-- 공통 코드를 활용하여 상태값의 확장성과 일관성 유지
-
-<br>
-
-### ✅ PR 자동 검사
-
-- 작업 브랜치 → `dev`, `dev` → `main` PR을 열거나 새 커밋을 추가하면 `CRM CI` 실행
-- 백엔드: Java 17 · Gradle `clean build`로 테스트와 빌드 검사
-- 프론트엔드: Node.js 22 · `npm ci` 후 ESLint, 타입 검사, 프로덕션 빌드 검사
-- PR 검사와 중복되지 않도록 머지 후 push에서는 실행하지 않음
-- 백엔드 테스트는 H2 메모리 DB 사용. 별도 DB나 운영 비밀번호 없이 실행하며, MySQL 환경 검증은 별도로 진행
-- 백엔드 테스트 보고서는 Actions 실행 결과의 `backend-test-reports`에서 7일간 다운로드 가능
-- Google Fonts를 내려받으므로 프론트 빌드 환경에 외부 네트워크 연결 필요
-
-로컬에서 같은 검사 실행:
+백엔드 (Java 17, H2 기반 테스트):
 
 ```bash
 cd backend
-# Windows PowerShell에서는 .\gradlew.bat clean build
-bash ./gradlew --no-daemon clean build
+bash ./gradlew clean build
+# Windows PowerShell: .\gradlew.bat clean build
 ```
+
+프론트엔드 (Node.js 22):
 
 ```bash
 cd frontend/crm-next
@@ -233,23 +73,6 @@ npm run typecheck
 npm run build
 ```
 
-검사 실패 시 머지를 차단하려면 `dev`와 `main`의 브랜치 규칙에 다음 두 검사를 필수로 지정:
+H2 테스트와 별개로 MySQL 환경에서의 동작 확인이 필요합니다. 프론트 빌드는 Google Fonts 다운로드를 위한 외부 연결이 필요합니다.
 
-- `Backend test and build`
-- `Frontend lint, types and build`
-
-<br>
-
-### 📄 배운 점 (What I Learned)
-
-- 상담 신청부터 담당자 배정까지 이어지는 실무형 CRM 데이터 흐름 설계
-- 고객의 현재 상태와 상담 이력을 분리하는 도메인 구조 이해
-- Spring Security와 JWT를 활용한 인증·인가 구현
-- `HttpOnly Cookie`를 활용한 토큰 저장 및 인증 처리
-- 관리자와 상담사의 Role 기반 접근 제어(RBAC) 구현
-- 로그인 사용자 기준 데이터 조회 및 담당자 권한 검증
-- 전화번호 + 생년월일을 활용한 기존 고객 중복 확인
-- 상담 신청 시 고객 및 상담 기록을 함께 저장하는 비즈니스 로직 구현
-- 공통 코드 기반의 상태값 및 UI 데이터 관리
-- Next.js와 Spring Boot 간 REST API 연동 경험
-- Git 브랜치 전략과 PR 기반 기능 개발 경험
+</details>
