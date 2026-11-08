@@ -207,6 +207,39 @@ NEW 상태의 미지정 고객 확인
 
 <br>
 
+### ✅ PR 자동 검사
+
+- 작업 브랜치 → `dev`, `dev` → `main` PR을 열거나 새 커밋을 추가하면 `CRM CI` 실행
+- 백엔드: Java 17 · Gradle `clean build`로 테스트와 빌드 검사
+- 프론트엔드: Node.js 22 · `npm ci` 후 ESLint, 타입 검사, 프로덕션 빌드 검사
+- PR 검사와 중복되지 않도록 머지 후 push에서는 실행하지 않음
+- 백엔드 테스트는 H2 메모리 DB 사용. 별도 DB나 운영 비밀번호 없이 실행하며, MySQL 환경 검증은 별도로 진행
+- 백엔드 테스트 보고서는 Actions 실행 결과의 `backend-test-reports`에서 7일간 다운로드 가능
+- Google Fonts를 내려받으므로 프론트 빌드 환경에 외부 네트워크 연결 필요
+
+로컬에서 같은 검사 실행:
+
+```bash
+cd backend
+# Windows PowerShell에서는 .\gradlew.bat clean build
+bash ./gradlew --no-daemon clean build
+```
+
+```bash
+cd frontend/crm-next
+npm ci
+npm run lint
+npm run typecheck
+npm run build
+```
+
+검사 실패 시 머지를 차단하려면 `dev`와 `main`의 브랜치 규칙에 다음 두 검사를 필수로 지정:
+
+- `Backend test and build`
+- `Frontend lint, types and build`
+
+<br>
+
 ### 📄 배운 점 (What I Learned)
 
 - 상담 신청부터 담당자 배정까지 이어지는 실무형 CRM 데이터 흐름 설계
