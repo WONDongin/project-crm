@@ -23,6 +23,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
             Specification<Customer> specification,
             Pageable pageable);
 
+    long countByCounselorIsNull();
+
+    @EntityGraph(attributePaths = "counselor")
+    Page<Customer> findByCounselorIsNull(Pageable pageable);
+
+    @Query("select c.status as status, count(c) as customerCount from Customer c group by c.status")
+    List<StatusCount> countAllStatuses();
+
     interface StatusCount { String getStatus(); long getCustomerCount(); }
     @Query("select c.status as status, count(c) as customerCount from Customer c where c.counselor.userId = :id group by c.status")
     List<StatusCount> countStatusesForCounselor(@Param("id") Long id);

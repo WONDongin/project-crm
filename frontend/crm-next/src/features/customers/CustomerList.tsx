@@ -18,9 +18,9 @@ function errorMessage(cause: unknown) {
   if (isAxiosError<{ message?: string; detail?: string }>(cause)) return cause.response?.data?.message || cause.response?.data?.detail || "요청을 처리하지 못했습니다. 다시 시도해 주세요.";
   return "요청을 처리하지 못했습니다. 다시 시도해 주세요.";
 }
-export default function CustomerList({ admin, initialStatus = "" }: { admin: boolean; initialStatus?: string }) {
+export default function CustomerList({ admin, initialStatus = "", initialCounselor = "" }: { admin: boolean; initialStatus?: string; initialCounselor?: string }) {
   const styles = admin ? adminStyles : consultantStyles;
-  const initial: Query = { keyword: "", status: initialStatus, interestCourse: "", counselor: "", page: 0 };
+  const initial: Query = { keyword: "", status: initialStatus, interestCourse: "", counselor: initialCounselor, page: 0 };
   const [query, setQuery] = useState(initial);
   const [filters, setFilters] = useState(initial);
   const [data, setData] = useState<CustomerPage>(empty);
@@ -109,7 +109,7 @@ export default function CustomerList({ admin, initialStatus = "" }: { admin: boo
         <label>관심 과정<select aria-label="관심 과정 필터" value={filters.interestCourse} onChange={event => setFilters({ ...filters, interestCourse: event.target.value })}><option value="">전체 과정</option>{options("INTEREST_COURSE").map(code => <option key={code.code} value={code.code}>{code.name}</option>)}</select></label>
         {admin ? <label>담당자<select aria-label="담당자 필터" value={filters.counselor} onChange={event => setFilters({ ...filters, counselor: event.target.value })}><option value="">전체 담당자</option><option value="unassigned">미배정</option>{counselors.map(staff => <option key={staff.userId} value={staff.userId}>{staff.name} ({staff.email})</option>)}</select></label>
           : null}
-        <div className={styles.actions}><button className={styles.primary} type="submit">검색</button><button type="button" onClick={() => changeQuery({ ...initial, status: "" }, true)}>초기화</button></div>
+        <div className={styles.actions}><button className={styles.primary} type="submit">검색</button><button type="button" onClick={() => changeQuery({ ...initial, status: "", counselor: "" }, true)}>초기화</button></div>
       </fieldset>
     </form>
     {notice && <p className={styles.notice} role={notice.error ? "alert" : "status"}>{notice.text}</p>}
