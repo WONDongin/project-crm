@@ -43,6 +43,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
     @Query("select c.counselor.userId as userId, count(c) as customerCount from Customer c where c.counselor is not null group by c.counselor.userId")
     List<AssignmentCount> countAssignments();
 
+    @Query("select c.counselor.userId as userId, count(c) as customerCount from Customer c where c.counselor.userId in :ids group by c.counselor.userId")
+    List<AssignmentCount> countAssignmentsForUsers(@Param("ids") List<Long> ids);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Customer c where c.counselor.userId = :userId order by c.customerId")
     List<Customer> findAssignedForUpdate(@Param("userId") Long userId);

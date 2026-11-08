@@ -8,12 +8,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController @RequestMapping("/admin/users") @RequiredArgsConstructor
 public class AdminUserController {
     private final AdminUserService users;
-    @GetMapping public ApiResponse<List<UserResponseDto>> list() { return ApiResponse.success(users.list()); }
+    @GetMapping
+    public ApiResponse<UserPageResponseDto> list(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String roles,
+            @RequestParam(defaultValue = "") String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication auth) {
+        return ApiResponse.success(users.list(auth.getName(), keyword, roles, status, page, size));
+    }
     @PostMapping @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<UserResponseDto> create(@Valid @RequestBody AdminUserRequestDto.Create request,Authentication auth) {
         return ApiResponse.success(users.create(auth.getName(),request),"계정이 생성되었습니다.");

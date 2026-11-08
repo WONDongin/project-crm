@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Collectors;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service @RequiredArgsConstructor @Transactional(readOnly=true)
 public class AdminUserService {
@@ -19,12 +23,54 @@ public class AdminUserService {
     private final CodeRepository codes;
     private final BCryptPasswordEncoder passwords;
 
-    public List<UserResponseDto> list() {
-        var counts=customers.countAssignments().stream().collect(Collectors.toMap(
-                CustomerRepository.AssignmentCount::getUserId, CustomerRepository.AssignmentCount::getCustomerCount));
-        return users.findAll().stream().sorted(Comparator.comparing(User::getUserId))
-                .map(u -> UserResponseDto.from(u, counts.getOrDefault(u.getUserId(),0L))).toList();
+    public UserPageResponseDto list(String actorEmail, String keyword, String roles, String status,
+                                    int page, int size) {
+        var actor = users.findByEmail(actorEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        if (!"ROLE_ADMIN".equals(actor.getRoles()) || !"ACTIVE".equals(actor.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "활성 관리자만 사용자를 조회할 수 있습니다.");
+        }
+        if (page < 0 || size < 1 || size > 100 || (long) page * size > Integer.MAX_VALUE) {
+            throw badSearch("페이지는 0 이상, 크기는 1~100이어야 합니다.");
+        }
+        String term = searchValue(keyword, 100);
+        String role = searchValue(roles, 20);
+        String state = searchValue(status, 20);
+        Specification<User> conditions = (root, query, cb) -> {
+            var predicates = new ArrayList<Predicate>();
+            if (!role.isEmpty()) predicates.add(cb.equal(root.get("roles"), role));
+            if (!state.isEmpty()) predicates.add(cb.equal(root.get("status"), state));
+            if (!term.isEmpty()) {
+                // %, _와 escape 문자도 검색어 그대로 비교한다.
+                String pattern = "%" + term.toLowerCase(Locale.ROOT)
+                        .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+                predicates.add(cb.or(cb.like(cb.lower(root.get("name")), pattern, '!'),
+                        cb.like(cb.lower(root.get("email")), pattern, '!')));
+            }
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+        var result = users.findAll(conditions,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "userId")));
+        var ids = result.getContent().stream().map(User::getUserId).toList();
+        Map<Long, Long> counts = ids.isEmpty() ? Map.of() : customers.countAssignmentsForUsers(ids).stream()
+                .collect(Collectors.toMap(CustomerRepository.AssignmentCount::getUserId,
+                        CustomerRepository.AssignmentCount::getCustomerCount));
+        var content = result.getContent().stream()
+                .map(user -> UserResponseDto.from(user, counts.getOrDefault(user.getUserId(), 0L))).toList();
+        return new UserPageResponseDto(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
     }
+
+    private String searchValue(String value, int maxLength) {
+        if (value == null) return "";
+        if (value.length() > maxLength) throw badSearch("검색 조건의 길이를 확인해 주세요.");
+        return value.strip();
+    }
+
+    private ResponseStatusException badSearch(String message) {
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    }
+
     @Transactional
     public UserResponseDto create(String actorEmail, AdminUserRequestDto.Create request) {
         var locked=users.findAllForAdministration(); requireAdmin(locked,actorEmail);
