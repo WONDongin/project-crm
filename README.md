@@ -17,7 +17,7 @@ flowchart TD
     Admin --> Service
     Consultant --> Service
     Service --> JPA["Spring Data JPA"]
-    JPA --> DB[("MySQL")]
+    JPA --> DB[("PostgreSQL")]
 ```
 
 <br>
@@ -85,7 +85,7 @@ JWT를 HttpOnly Cookie로 전달하고, 요청마다 계정 활성 상태·역�
 | --- | --- |
 | Backend | Java 17, Spring Boot 3, Spring Data JPA, Spring Security, JWT, Gradle |
 | Frontend | Next.js 16 (App Router), React, TypeScript, Axios, Zustand, CSS Modules |
-| Database | MySQL 8 / 테스트: H2 |
+| Database | PostgreSQL / 테스트: H2 |
 | Test · CI | JUnit 5, MockMvc, Mockito, GitHub Actions |
 
 <Br>
@@ -117,6 +117,6 @@ npm run typecheck
 npm run build
 ```
 
-H2 테스트와 별개로 MySQL 환경에서의 동작 확인이 필요합니다. 프론트 빌드는 Google Fonts 다운로드를 위한 외부 연결이 필요합니다.
+자동 테스트는 H2 환경에서 실행됩니다. PostgreSQL 환경에서의 실제 데이터베이스 동작은 별도로 확인해야 합니다. 프론트 빌드는 Google Fonts 다운로드를 위한 외부 연결이 필요합니다.
 
 </details>
